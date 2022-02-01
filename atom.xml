@@ -6,7 +6,7 @@
   <link href="http://miaohao-oops.github.io/atom.xml" rel="self"/>
   
   <link href="http://miaohao-oops.github.io/"/>
-  <updated>2022-02-01T16:23:57.691Z</updated>
+  <updated>2022-02-01T16:31:12.564Z</updated>
   <id>http://miaohao-oops.github.io/</id>
   
   <author>
@@ -21,16 +21,17 @@
     <link href="http://miaohao-oops.github.io/2022/02/01/try-latex/"/>
     <id>http://miaohao-oops.github.io/2022/02/01/try-latex/</id>
     <published>2022-02-01T14:21:13.000Z</published>
-    <updated>2022-02-01T16:23:57.691Z</updated>
+    <updated>2022-02-01T16:31:12.564Z</updated>
     
-    <content type="html"><![CDATA[<p><span class="math inline">\(a=\lambda x.x\)</span></p><p><img src="/img/a.png" /></p>]]></content>
+    <content type="html"><![CDATA[<p><span class="math inline">\(a=\lambda x.x\)</span></p><p><span class="math display">\[A = \begin{bmatrix}        a_{11}    &amp; a_{12}    &amp; ...    &amp; a_{1n}\\        a_{21}    &amp; a_{22}    &amp; ...    &amp; a_{2n}\\        a_{31}    &amp; a_{22}    &amp; ...    &amp; a_{3n}\\        \vdots    &amp; \vdots    &amp; \ddots &amp; \vdots\\        a_{n1}    &amp; a_{n2}    &amp; ... &amp; a_{nn}\\    \end{bmatrix} , b = \begin{bmatrix}        b_{1}  \\        b_{2}  \\        b_{3}  \\        \vdots \\        b_{n}  \\    \end{bmatrix}\]</span></p><p><img src="/img/a.png" /></p>]]></content>
     
     
       
       
     <summary type="html">&lt;p&gt;&lt;span class=&quot;math inline&quot;&gt;\(a=\lambda x.x\)&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;/img/a.png&quot; /&gt;&lt;/p&gt;
-</summary>
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[
+A = \begin{bmatrix}
+        a_{11}    &amp;amp; a_{12</summary>
       
     
     
