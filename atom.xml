@@ -6,7 +6,7 @@
   <link href="http://miaohao-oops.github.io/atom.xml" rel="self"/>
   
   <link href="http://miaohao-oops.github.io/"/>
-  <updated>2022-02-01T15:26:56.382Z</updated>
+  <updated>2022-02-01T15:35:56.969Z</updated>
   <id>http://miaohao-oops.github.io/</id>
   
   <author>
@@ -21,15 +21,14 @@
     <link href="http://miaohao-oops.github.io/2022/02/01/try-latex/"/>
     <id>http://miaohao-oops.github.io/2022/02/01/try-latex/</id>
     <published>2022-02-01T14:21:13.000Z</published>
-    <updated>2022-02-01T15:26:56.382Z</updated>
+    <updated>2022-02-01T15:35:56.969Z</updated>
     
-    <content type="html"><![CDATA[<p>$a=\lambda x.x$</p><p><img src="try-latex/a.png" alt=""></p>]]></content>
+    <content type="html"><![CDATA[<script type="math/tex; mode=display">a=\lambda x.x</script><p><img src="try-latex/a.png" alt=""></p>]]></content>
     
     
       
       
-    <summary type="html">&lt;p&gt;$a=\lambda x.x$&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;try-latex/a.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+    <summary type="html">&lt;script type=&quot;math/tex; mode=display&quot;&gt;a=\lambda x.x&lt;/script&gt;&lt;p&gt;&lt;img src=&quot;try-latex/a.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
 </summary>
       
     
