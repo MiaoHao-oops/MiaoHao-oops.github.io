@@ -61,7 +61,8 @@
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
-<meta name="generator" content="Hexo 6.0.0"><style>mjx-container[jax="SVG"] {
+<meta name="generator" content="Hexo 6.0.0"><link rel="alternate" href="/atom.xml" title="Miao's Blog" type="application/atom+xml">
+<style>mjx-container[jax="SVG"] {
   direction: ltr;
 }
 
@@ -173,8 +174,7 @@ mjx-container[display="true"] {
 mjx-container[display="true"] + br {
   display: none;
 }
-</style><link rel="alternate" href="/atom.xml" title="Miao's Blog" type="application/atom+xml">
-</head>
+</style></head>
 <body>
 <div class="single">
 <div class="popup search-popup local-search-popup">
@@ -251,7 +251,7 @@ mjx-container[display="true"] + br {
 </div>
 
 </div>
-
+<div class="comment"><div id="comments"></div></div>
 <footer>
   <div>
   Copyright &copy; 2022.<a href="/">Miao's Blog</a><br>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme <a href="https://lx.js.org" target="_blank">Lx</a><br>
@@ -333,6 +333,26 @@ mjx-container[display="true"] + br {
 }());
 </script>
 <script src="https://cdn.jsdelivr.net/npm/theme-lx@0.4.3/source/dist/js/local.search.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.16/dist/Valine.min.js"></script>
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'y7tlaLEOoW5C1xBYm8VBo64Q-gzGzoHsz',
+    appKey: 'F7gylUefEEtQk24FEbvgfnBi',
+    placeholder: '此处留言',
+    avatar: 'identicon',
+    meta: guest,
+    pageSize: '10' || 10,
+    lang: 'zh-cn' || 'zh-cn'
+  });
+</script>
 
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
