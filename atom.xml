@@ -44,19 +44,12 @@
     <link href="http://miaohao-oops.github.io/2022/02/01/try-latex/"/>
     <id>http://miaohao-oops.github.io/2022/02/01/try-latex/</id>
     <published>2022-02-01T14:21:13.000Z</published>
-    <updated>2022-02-02T07:48:11.902Z</updated>
+    <updated>2022-02-02T07:53:37.928Z</updated>
     
     <content type="html"><![CDATA[<p><span class="math inline">\(a=\lambda x.x\)</span></p><p>Hello!</p><p><span class="math display">\[A = \begin{bmatrix}        a_{11}    &amp; a_{12}    &amp; ...    &amp; a_{1n}\\        a_{21}    &amp; a_{22}    &amp; ...    &amp; a_{2n}\\        a_{31}    &amp; a_{22}    &amp; ...    &amp; a_{3n}\\        \vdots    &amp; \vdots    &amp; \ddots &amp; \vdots\\        a_{n1}    &amp; a_{n2}    &amp; ... &amp; a_{nn}\\    \end{bmatrix} , b = \begin{bmatrix}        b_{1}  \\        b_{2}  \\        b_{3}  \\        \vdots \\        b_{n}  \\    \end{bmatrix}\]</span></p><p><img src="/img/a.png" /></p>]]></content>
     
     
-      
-      
-    <summary type="html">&lt;p&gt;&lt;span class=&quot;math inline&quot;&gt;\(a=\lambda x.x\)&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;Hello!&lt;/p&gt;
-&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[
-A = \begin{bmatrix}
-        a_{11} </summary>
-      
+    <summary type="html">Hello!</summary>
     
     
     
