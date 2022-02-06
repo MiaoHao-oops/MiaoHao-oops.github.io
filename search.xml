@@ -8,7 +8,7 @@
 <h2 id="chapter-2">Chapter 2</h2>
 <figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  std::cout &lt;&lt; <span class="hljs-string">&quot;Hello, World!\n&quot;</span>;<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
 <h2 id="chapter-3">Chapter 3</h2>
-<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash">!/usr/bin/bash</span><br>echo &quot;Hello, World!&quot;<br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash">!/usr/bin/bash</span><br>echo &quot;Hello, World!&quot;<br></code></pre></td></tr></table></figure>
 <h2 id="chapter-4">Chapter 4</h2>
 <figure class="highlight ruby"><table><tr><td class="code"><pre><code class="hljs ruby"><span class="hljs-meta">#!/usr/bin/ruby</span><br>puts <span class="hljs-string">&quot;Hello, World!&quot;</span><br></code></pre></td></tr></table></figure>
 <h2 id="chapter-5">Chapter 5</h2>
@@ -33,6 +33,46 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo deploy<br></code></pre></td></tr></table></figure>
 <p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
 ]]></content>
+  </entry>
+  <entry>
+    <title>nju-pa摸鱼记1-宏的妙用</title>
+    <url>/2022/01/31/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B01-%E5%AE%8F%E7%9A%84%E5%A6%99%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="一前言">一、前言</h2>
+<p>上学期在课内学习了《计算机体系结构》，一直对最后一章老师讲到的硬件模拟器念念不忘，好奇它的工作原理。好巧不巧，某日在我刷github的时候南京大学的<a href="https://github.com/NJU-ProjectN/ics-pa">ics-pa项目</a>出现在了我的首页推荐中，于是我便打算利用寒假的时间过一下这个项目，并通过<a href="https://www.bilibili.com/read/cv15072569">B站的专栏</a>（现在同步到我的个人博客上）记录一些新的知识或者是心得体会。</p>
+<h2 id="二使用宏配置编译选项">二、使用宏配置编译选项</h2>
+<p>在项目代码进行编译前，需要先使用</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">make menuconfig<br></code></pre></td></tr></table></figure>
+<p>对项目进行配置，在勾选了一些选项退出后，<code>menuconfig</code>会根据之前的选项生成一些宏保存到若干文件中，供之后的.c文件或Makefile文件所包含（使用include）。这样，在C语言源文件或makefile脚本中通过对这些宏加以判断，就可以在编译时使用或抛弃某些特定的功能。</p>
+<h2 id="三c语言中检测宏是否被定义">三、C语言中检测宏是否被定义</h2>
+<h3 id="使用条件编译指令">1、使用条件编译指令</h3>
+<p>在C语言源文件中，可以使用条件编译指令</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> FOO</span><br>  ...<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
+<p>将宏<code>FOO</code>对应功能的代码包围起来，如果在<code>menuconfig</code>中勾选了该宏所对应的选项，则宏<code>FOO</code>会被定义，最终这段代码也会被编译。</p>
+<h3 id="使用宏定义">2、使用宏定义</h3>
+<p>除了使用条件编译指令，代码框架还提供了另一种方式检测某个宏是否被定义。之所以要使用另一种方式，是因为条件编译指令不能使用在宏定义中，而频繁地使用条件编译指令会使代码的可读性大打折扣。实现这个功能的关键代码包括：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// macro.h</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifndef</span> _MACRO_H_</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> _MACRO_H_</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> str_temp(x) #x</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> str(x) str_temp(x)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> isdef(macro) (strcmp(<span class="hljs-meta-string">&quot;&quot;</span> #macro, <span class="hljs-meta-string">&quot;&quot;</span> str(macro)) != 0)</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
+<p>其中宏<code>str(x)</code>使用<code>#</code>运算符将<code>x</code>转化为一个字符串。下面举一个例子来说明<code>isdef</code>这个宏是怎么工作的：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// main.c</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;macro.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FOO 123</span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">int</span> a = isdef(FOO);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>经过预处理</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">gcc -o main.i -E main.c<br></code></pre></td></tr></table></figure>
+<p>main.i中的内容为：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// main.i</span><br>...<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">int</span> a = (<span class="hljs-built_in">strcmp</span>(<span class="hljs-string">&quot;&quot;</span> <span class="hljs-string">&quot;FOO&quot;</span>, <span class="hljs-string">&quot;&quot;</span> <span class="hljs-string">&quot;123&quot;</span>) != <span class="hljs-number">0</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br>...<br></code></pre></td></tr></table></figure>
+<p>可以发现，<code>strcmp</code>函数的第一个参数对应<code>isdef</code>宏定义中的<code>"" #macro</code>，它直接将宏参数的名称转换为了字符串，而第二个参数对应<code>"" str(macro)</code>，它先将<code>FOO</code>替换为<code>123</code>，然后将<code>123</code>转换为字符串。因此当这两个参数不同时，说明宏已经被定义过。</p>
+<p>    通过上面的分析可以发现，宏<code>isdef</code>不能检测宏定义的值与宏定义名称相同的宏，比如说</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FOO FOO</span><br></code></pre></td></tr></table></figure>
+<p>宏<code>FOO</code>在预处理时仍然被替换为<code>FOO</code>，最后将导致错误的结果。</p>
+<p>四、参考资料</p>
+<ul>
+<li><p><a href="https://stackoverflow.com/questions/26099745/test-if-preprocessor-symbol-is-defined-inside-macro">stackoverflow上关于如何判断宏是否被定义的讨论</a></p></li>
+<li><p><a href="https://github.com/NJU-ProjectN/ics-pa">南京大学ics-pa项目</a></p></li>
+</ul>
+]]></content>
+      <categories>
+        <category>NEMU</category>
+      </categories>
+      <tags>
+        <tag>C语言</tag>
+      </tags>
   </entry>
   <entry>
     <title>try latex</title>
