@@ -55,6 +55,31 @@
   
   
   <entry>
+    <title>nju-pa摸鱼记2-计算机与λ演算</title>
+    <link href="/2022/02/01/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B02-%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%8E%CE%BB%E6%BC%94%E7%AE%97/"/>
+    <url>/2022/02/01/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B02-%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%8E%CE%BB%E6%BC%94%E7%AE%97/</url>
+    
+    <content type="html"><![CDATA[<h2 id="一前言">一、前言</h2><p>在<a href="https://miaohao-oops.github.io/2022/01/31/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B01-%E5%AE%8F%E7%9A%84%E5%A6%99%E7%94%A8/">上一篇</a>中，讨论了如何使用预处理指令或是宏来识别某个宏是否被定义，以实现通过配置进行有选择的编译。不过，仅使用上一篇讨论的<code>isdef</code>宏还不能达到和预处理指令一样的效果，本篇将继续讨论框架中如何使用宏来实现“<strong>如果某个宏被定义，则预处理后保留某些语句或代码块，反之抛弃这些部分</strong>”的功能。之所以提到<span class="math inline">\(\lambda\)</span>演算，是由于我在搞明白代码框架中的宏是如何运作之后，发现其颇有“函数式编程”的风格，而<span class="math inline">\(\lambda\)</span>演算是函数式编程的基础，遂记录于此。</p><h2 id="二浅谈lambda演算">二、浅谈<span class="math inline">\(\lambda\)</span>演算</h2><h3 id="简介">1、简介</h3><p><span class="math inline">\(\lambda\)</span>演算是一种和图灵机等价的计算模型（<strong>丘奇-图灵论题</strong>），它可以描述任何可计算问题，又称为“最小的编程语言”。简单来说，<span class="math inline">\(\lambda\)</span>演算的核心是<strong>抽象化定义的函数</strong>，它的参数没有类型的限制，可以是数字，函数或者字符串等等。一个最基础的函数是恒等函数：</p><p><span class="math display">\[\lambda x.x\]</span></p><p>其中<span class="math inline">\(\lambda\)</span>后的<span class="math inline">\(x\)</span>是这个函数的<strong>输入</strong>，点号后的<span class="math inline">\(x\)</span>是函数的<strong>输出</strong>。可以将这个函数作用在变量<span class="math inline">\(a\)</span>上，就得到：</p><p><span class="math display">\[\lambda x.x(a) = a\]</span></p><p>通过<strong>柯里化</strong>方法，可以定义二输入函数：</p><p><span class="math display">\[\lambda x.\lambda y.x+y\]</span></p><p>其中<span class="math inline">\(x\)</span>和<span class="math inline">\(y\)</span>是该函数的两个输入，该函数的输出是两个输入的和。</p><h3 id="用抽象化函数表示布尔逻辑">2、用抽象化函数表示布尔逻辑</h3><p>在<span class="math inline">\(\lambda\)</span>演算中，没有布尔值的概念，但是可以定义两个函数来表示布尔逻辑：</p><p><span class="math display">\[\text{TRUE} = \lambda x.\lambda y.x\]</span></p><p><span class="math display">\[\text{FALSE} = \lambda x.\lambda y.y\]</span></p><p>用自然语言来描述<span class="math inline">\(\text{TRUE}\)</span>函数的作用：“输入两个参数<span class="math inline">\(x\)</span>和<span class="math inline">\(y\)</span>，输出第一个参数”，<span class="math inline">\(\text{FALSE}\)</span>函数的功能同理。这样的话，可以把布尔值<span class="math inline">\(1\)</span>和<span class="math inline">\(0\)</span>分别定义成<span class="math inline">\(\text{TRUE}\)</span>函数和<span class="math inline">\(\text{FALSE}\)</span>函数。接下来可以定义最基本的非、与、或运算：</p><p><span class="math display">\[\begin{cases}\text{NOT} &amp;= \lambda x.x\ \text{FALSE}\ \text{TRUE} \\\text{AND} &amp;= \lambda x.\lambda y.x\ y\ \text{FALSE} \\\text{OR} &amp;= \lambda x.\lambda y. x\ \text{TRUE}\ y \\\end{cases}\]</span></p><p>上面的三个函数都是利用了<span class="math inline">\(\lambda\)</span>演算中参数可以是函数的性质，输入的<span class="math inline">\(\text{TRUE}\)</span>或<span class="math inline">\(\text{FALSE}\)</span>都可以作为函数继续运算，下面以<span class="math inline">\(\text{AND}\)</span>函数为例进行验证：</p><p><span class="math display">\[\begin{align*}\text{AND}(\text{FALSE})(\text{FALSE}) &amp;= \text{FALSE}(\text{FALSE})(\text{FALSE}) \\&amp;= \text{FALSE}\end{align*}\]</span></p><p><span class="math display">\[\begin{align*}\text{AND}(\text{FALSE})(\text{TRUE}) &amp;= \text{FALSE}(\text{TRUE})(\text{FALSE}) \\&amp;= \text{FALSE}\end{align*}\]</span></p><p><span class="math display">\[\begin{align*}\text{AND}(\text{TRUE})(\text{FALSE}) &amp;= \text{TRUE}(\text{FALSE})(\text{FALSE}) \\&amp;= \text{FALSE}\end{align*}\]</span></p><p><span class="math display">\[\begin{align*}\text{AND}(\text{TRUE})(\text{TRUE}) &amp;= \text{TRUE}(\text{TRUE})(\text{FALSE}) \\&amp;= \text{TRUE}\end{align*}\]</span></p><p>当且仅当<span class="math inline">\(x\)</span>与<span class="math inline">\(y\)</span>均为<span class="math inline">\(\text{TRUE}\)</span>时，<span class="math inline">\(\text{AND}\)</span>的值为<span class="math inline">\(\text{TRUE}\)</span>。因此，函数<span class="math inline">\(\text{AND}\)</span>的定义正确。</p><h3 id="lambda演算与计算机的联系">3、<span class="math inline">\(\lambda\)</span>演算与计算机的联系</h3><p><span class="math inline">\(\text{TRUE}\)</span>和<span class="math inline">\(\text{FALSE}\)</span>这两个函数的功能用一个词来概括就是“<strong>选择</strong>”，在数字电路中，也有一个可以做选择的模块：<strong>选择器</strong>。选择器有三个输入端口<span class="math inline">\(a\)</span>，<span class="math inline">\(b\)</span>和<span class="math inline">\(sel\)</span>，一个输出端口<span class="math inline">\(y\)</span>，根据<span class="math inline">\(sel\)</span>的值可以决定<span class="math inline">\(y\)</span>的值是和<span class="math inline">\(a\)</span>相同还是和<span class="math inline">\(b\)</span>相同（比如当<span class="math inline">\(sel = \text{TRUE}\)</span>时，<span class="math inline">\(y=a\)</span>；<span class="math inline">\(sel = \text{FALSE}\)</span>时，<span class="math inline">\(y = b\)</span>），类似的，可以构建函数：</p><p><span class="math display">\[\text{MUX} = \lambda a.\lambda b.\lambda sel.sel\ a\ b\]</span></p><p>这个函数看起来有些奇怪，似乎只是把三个参数排列在一起输出了，并不能看出其中的“选择功能”，但是<span class="math inline">\(\lambda\)</span>表达式的特别之处就在于输入的参数可以是函数，从而可以进一步作用在后面的参数上。下面来验证一下的功能：</p><p><span class="math display">\[\begin{align*}\text{MUX}(a)(b)(\text{TRUE}) &amp;= \text{TRUE}(a)(b) = a \\\text{MUX}(a)(b)(\text{FALSE}) &amp;= \text{FALSE}(a)(b) = b \\\end{align*}\]</span></p><p><span class="math inline">\(\text{MUX}\)</span>函数的工作行为与选择器完全一致！放在硬件中，<span class="math inline">\(\text{MUX}\)</span>函数是选择器，而在软件中，它就是<code>if</code>语句：</p><figure class="highlight c"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> (sel) &#123;<br>  a<br>&#125; <span class="hljs-keyword">else</span> &#123;<br>  b<br>&#125;<br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>NEMU</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>理论计算机科学</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>nju-pa摸鱼记1-宏的妙用</title>
     <link href="/2022/01/31/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B01-%E5%AE%8F%E7%9A%84%E5%A6%99%E7%94%A8/"/>
     <url>/2022/01/31/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B01-%E5%AE%8F%E7%9A%84%E5%A6%99%E7%94%A8/</url>
