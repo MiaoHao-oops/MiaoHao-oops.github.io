@@ -24,7 +24,7 @@
 <meta property="og:description" content="一、前言 在上一篇中，讨论了如何使用预处理指令或是宏来识别某个宏是否被定义，以实现通过配置进行有选择的编译。不过，仅使用上一篇讨论的isdef宏还不能达到和预处理指令一样的效果，本篇将继续讨论框架中如何使用宏来实现“如果某个宏被定义，则预处理后保留某些语句或代码块，反之抛弃这些部分”的功能。之所以提到\(\lambda\)演算，是由于我在搞明白代码框架中的宏是如何运作之后，发现其颇有“函数式编程”">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-02-01T08:40:20.000Z">
-<meta property="article:modified_time" content="2022-02-14T01:33:32.492Z">
+<meta property="article:modified_time" content="2022-02-16T08:10:52.709Z">
 <meta property="article:author" content="MiaoHao-oops">
 <meta property="article:tag" content="理论计算机科学">
 <meta name="twitter:card" content="summary_large_image">
@@ -198,7 +198,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      2.4k 字
+      4.4k 字
     </span>
   
 
@@ -207,7 +207,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      21 分钟
+      37 分钟
     </span>
   
 
@@ -308,6 +308,29 @@
 \]</span></p>
 <p><span class="math inline">\(\text{MUX}\)</span>函数的工作行为与选择器完全一致！放在硬件中，<span class="math inline">\(\text{MUX}\)</span>函数是选择器，而在软件中，它就是<code>if</code>语句：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> (sel) &#123;<br>  a<br>&#125; <span class="hljs-keyword">else</span> &#123;<br>  b<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="三更进一步">三、更进一步</h2>
+<p>有了<span class="math inline">\(\text{MUX}\)</span>函数，就可以实现宏定义的“条件编译”了，只需要改变一下它0的输入参数即可：</p>
+<p><span class="math display">\[
+\text{MUX}(code\_block, , \text{isdef}(macro))
+\]</span></p>
+<p>其中<code>isdef</code>是在上一篇定义的宏函数，如果<span class="math inline">\(macro\)</span>已经被定义了，它将返回<span class="math inline">\(\text{TRUE}\)</span>，反之返回<span class="math inline">\(\text{FALSE}\)</span>。<span class="math inline">\(code_block\)</span>是在宏<span class="math inline">\(macro\)</span>被定义后希望在预处理时被保留下来的代码块。传给<span class="math inline">\(\text{MUX}\)</span>函数的第二个参数是一个空串，也就是说在<span class="math inline">\(macro\)</span>未被定义时，预处理后会留下一个空串，对于最后的预处理结果没有任何影响。</p>
+<p>通过上面的抽象定义，已经实现了预期的功能，但是到C语言中，还面临着一些细节问题。首先，<code>isdef</code>的值是<code>1</code>或<code>0</code>，而不是上面定义的和函数。这就导致C语言预处理器并不会把<code>isdef</code>替换为<code>1</code>或<code>0</code>后再当作一个“函数”来解释。其次，<code>isdef</code>中使用了<code>strcmp</code>函数，这显然不能在函数外面使用，函数的运行结果在运行时才被计算出来。</p>
+<p>对于第一个问题，如何将<code>isdef</code>的值解释为一个函数呢？由于<code>1</code>和<code>0</code>在C语言中被解释为整型字面量，所以可以给这个<code>1</code>或者<code>0</code>“加点东西”，然后定义新的宏，这里用到了<code>##</code>运算符：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> concat(a, b) a ## b</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MUX_MID(a, b, p, sel) MUX(a, b, concat(p, sel))</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MUX_OUT(a, b, sel) MUX_MID(a, b, PREFIX_, sel)</span><br></code></pre></td></tr></table></figure>
+<p>宏<code>concat</code>将两个参数粘连起来，<code>MUX</code>仍然是上面抽象的函数。假设<code>MUX_OUT</code>的输入参数是<code>(code_block, , isdef(foo)</code>，并且宏<code>foo</code>已经被定义过，先不考虑其他问题，经过宏<code>MUX_MID</code>和<code>concat</code>，最终传入<code>MUX</code>的参数将会变为<code>(code_block, , PREFIX_1)</code>。如果我们继续定义宏函数<code>PREFIX_1</code>和<code>PREFIX_0</code>，就可以解决第一个问题了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> TRUE(a, b) a</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FALSE(a, b) b</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PREFIX_1(a, b) TRUE(a, b)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PREFIX_0(a, b) FALSE(a, b)\</span><br></code></pre></td></tr></table></figure>
+<p>这里定义的<code>TRUE</code>和<code>FALSE</code>宏函数其实就是上面<span class="math inline">\(\lambda\)</span>演算中的<span class="math inline">\(\text{TRUE}\)</span>和<span class="math inline">\(\text{FALSE}\)</span>！现在，考虑宏<code>MUX</code>怎么定义，我们想要将最后的<code>PREFIX_1</code>或者<code>PREFIX_0</code>作用在<code>a</code>和<code>b</code>上，那么只需要改一下参数的顺序，再加个括号就行了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MUX(a, b, sel) sel(a, b)</span><br></code></pre></td></tr></table></figure>
+<p>下面来看第二个问题，宏<code>isdef</code>在预处理阶段不会被替换为<code>1</code>或<code>0</code>，因此，不能通过<code>MUX_OUT(a, b, isdef(macro))</code>来使用这个宏，这样肯定是有问题的。需要一个宏，能在预处理阶段就产生<code>1</code>或<code>0</code>的结果。由于我们是在配置编译时使用，所以对于某个选项，要么它被定义了，要么它没被定义，而被定义的宏我们并不在乎它是什么值，所以可以限制为：“一旦定义，就将它定义为<code>t</code>”（这个限制只在本篇中成立）。</p>
+<p>再整理一下，现在需要一个宏，来检测一个“一旦定义，就被一定被定义成<code>t</code>”的宏是否被定义，如果被定义了，预处理时它会被替换成<code>1</code>，否则被替换成<code>0</code>。在这个假设下，被定义了的宏会被替换为<code>t</code>，而没有被定义的宏在预处理阶段会保留为宏名。可以使用刚才的“加点东西”技术，把替换后的<code>t</code>再进一步替换为别的东西：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> choose2nd(a, b, ...) b</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PREFIX_t t,</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> choose2nd_mid(p_macro, a, b) choose2nd(p_macro a, b)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> choose2nd_out(macro, a, b) choose2nd_mid(concat(PREFIX_, macro), a, b)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> IFDEF(macro) choose2nd_out(macro, 1, 0)</span><br></code></pre></td></tr></table></figure>
+<p>这一系列宏的关键之处在于<code>choose2nd_mid</code>宏定义中<code>p_macro</code>和<code>a</code>之间没有逗号，如果<code>macro</code>被定义成了<code>t</code>，则会被替换为“<code>t,</code>”（<code>t</code>后面有一个逗号分隔），从而成为了第二个参数；当未被定义或者被定义成别的，是第二个参数。</p>
+<p>上面的讨论中已经涉及了大部分NEMU框架中所使用的技巧和方法，实现这些宏的思路与<span class="math inline">\(\lambda\)</span>演算关系密切，这种思路也许就是“函数式编程”。</p>
+<h2 id="四参考资料">四、参考资料</h2>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/NJU-ProjectN/ics-pa">南京大学ics-pa在github上的项目</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1VA411H7Ym?share_source=copy_web"><span class="math inline">\(\lambda\)</span>演算简介</a></p></li>
+</ul>
 
             </div>
             <hr>
