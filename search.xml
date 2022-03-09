@@ -17,28 +17,39 @@
   </entry>
   <entry>
     <title>Hello World</title>
-    <url>/2022/02/01/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+    <url>/2022/03/09/hello-world/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very
+first post. Check <a href="https://hexo.io/docs/">documentation</a> for
+more info. If you get any problems when using Hexo, you can find the
+answer in <a
+href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or
+you can ask me on <a
+href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
 <h2 id="quick-start">Quick Start</h2>
 <h3 id="create-a-new-post">Create a new post</h3>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo new <span class="hljs-string">&quot;My New Post&quot;</span><br></code></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
+<p>More info: <a
+href="https://hexo.io/docs/writing.html">Writing</a></p>
 <h3 id="run-server">Run server</h3>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo server<br></code></pre></td></tr></table></figure>
 <p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
 <h3 id="generate-static-files">Generate static files</h3>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo generate<br></code></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
+<p>More info: <a
+href="https://hexo.io/docs/generating.html">Generating</a></p>
 <h3 id="deploy-to-remote-sites">Deploy to remote sites</h3>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo deploy<br></code></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<p>More info: <a
+href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
 ]]></content>
   </entry>
   <entry>
     <title>nju-pa摸鱼记1-宏的妙用</title>
     <url>/2022/01/31/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B01-%E5%AE%8F%E7%9A%84%E5%A6%99%E7%94%A8/</url>
     <content><![CDATA[<h2 id="一前言">一、前言</h2>
-<p>上学期在课内学习了《计算机体系结构》，一直对最后一章老师讲到的硬件模拟器念念不忘，好奇它的工作原理。好巧不巧，某日在我刷github的时候南京大学的<a href="https://github.com/NJU-ProjectN/ics-pa">ics-pa项目</a>出现在了我的首页推荐中，于是我便打算利用寒假的时间过一下这个项目，并通过<a href="https://www.bilibili.com/read/cv15072569">B站的专栏</a>（现在同步到我的个人博客上）记录一些新的知识或者是心得体会。</p>
+<p>上学期在课内学习了《计算机体系结构》，一直对最后一章老师讲到的硬件模拟器念念不忘，好奇它的工作原理。好巧不巧，某日在我刷github的时候南京大学的<a
+href="https://github.com/NJU-ProjectN/ics-pa">ics-pa项目</a>出现在了我的首页推荐中，于是我便打算利用寒假的时间过一下这个项目，并通过<a
+href="https://www.bilibili.com/read/cv15072569">B站的专栏</a>（现在同步到我的个人博客上）记录一些新的知识或者是心得体会。</p>
 <h2 id="二使用宏配置编译选项">二、使用宏配置编译选项</h2>
 <p>在项目代码进行编译前，需要先使用</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">make menuconfig<br></code></pre></td></tr></table></figure>
@@ -63,8 +74,10 @@
 <p>宏<code>FOO</code>在预处理时仍然被替换为<code>FOO</code>，最后将导致错误的结果。</p>
 <p>四、参考资料</p>
 <ul>
-<li><p><a href="https://stackoverflow.com/questions/26099745/test-if-preprocessor-symbol-is-defined-inside-macro">stackoverflow上关于如何判断宏是否被定义的讨论</a></p></li>
-<li><p><a href="https://github.com/NJU-ProjectN/ics-pa">南京大学ics-pa项目</a></p></li>
+<li><p><a
+href="https://stackoverflow.com/questions/26099745/test-if-preprocessor-symbol-is-defined-inside-macro">stackoverflow上关于如何判断宏是否被定义的讨论</a></p></li>
+<li><p><a
+href="https://github.com/NJU-ProjectN/ics-pa">南京大学ics-pa项目</a></p></li>
 </ul>
 ]]></content>
       <categories>
@@ -72,102 +85,6 @@
       </categories>
       <tags>
         <tag>C语言</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>nju-pa摸鱼记2-计算机与λ演算</title>
-    <url>/2022/02/01/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B02-%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%8E%CE%BB%E6%BC%94%E7%AE%97/</url>
-    <content><![CDATA[<h2 id="一前言">一、前言</h2>
-<p>在<a href="https://miaohao-oops.github.io/2022/01/31/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B01-%E5%AE%8F%E7%9A%84%E5%A6%99%E7%94%A8/">上一篇</a>中，讨论了如何使用预处理指令或是宏来识别某个宏是否被定义，以实现通过配置进行有选择的编译。不过，仅使用上一篇讨论的<code>isdef</code>宏还不能达到和预处理指令一样的效果，本篇将继续讨论框架中如何使用宏来实现“<strong>如果某个宏被定义，则预处理后保留某些语句或代码块，反之抛弃这些部分</strong>”的功能。之所以提到<span class="math inline">\(\lambda\)</span>演算，是由于我在搞明白代码框架中的宏是如何运作之后，发现其颇有“函数式编程”的风格，而<span class="math inline">\(\lambda\)</span>演算是函数式编程的基础，遂记录于此。</p>
-<h2 id="二浅谈lambda演算">二、浅谈<span class="math inline">\(\lambda\)</span>演算</h2>
-<h3 id="简介">1、简介</h3>
-<p><span class="math inline">\(\lambda\)</span>演算是一种和图灵机等价的计算模型（<strong>丘奇-图灵论题</strong>），它可以描述任何可计算问题，又称为“最小的编程语言”。简单来说，<span class="math inline">\(\lambda\)</span>演算的核心是<strong>抽象化定义的函数</strong>，它的参数没有类型的限制，可以是数字，函数或者字符串等等。一个最基础的函数是恒等函数：</p>
-<p><span class="math display">\[\lambda x.x\]</span></p>
-<p>其中<span class="math inline">\(\lambda\)</span>后的<span class="math inline">\(x\)</span>是这个函数的<strong>输入</strong>，点号后的<span class="math inline">\(x\)</span>是函数的<strong>输出</strong>。可以将这个函数作用在变量<span class="math inline">\(a\)</span>上，就得到：</p>
-<p><span class="math display">\[\lambda x.x(a) = a\]</span></p>
-<p>通过<strong>柯里化</strong>方法，可以定义二输入函数：</p>
-<p><span class="math display">\[\lambda x.\lambda y.x+y\]</span></p>
-<p>其中<span class="math inline">\(x\)</span>和<span class="math inline">\(y\)</span>是该函数的两个输入，该函数的输出是两个输入的和。</p>
-<h3 id="用抽象化函数表示布尔逻辑">2、用抽象化函数表示布尔逻辑</h3>
-<p>在<span class="math inline">\(\lambda\)</span>演算中，没有布尔值的概念，但是可以定义两个函数来表示布尔逻辑：</p>
-<p><span class="math display">\[\text{TRUE} = \lambda x.\lambda y.x\]</span></p>
-<p><span class="math display">\[\text{FALSE} = \lambda x.\lambda y.y\]</span></p>
-<p>用自然语言来描述<span class="math inline">\(\text{TRUE}\)</span>函数的作用：“输入两个参数<span class="math inline">\(x\)</span>和<span class="math inline">\(y\)</span>，输出第一个参数”，<span class="math inline">\(\text{FALSE}\)</span>函数的功能同理。这样的话，可以把布尔值<span class="math inline">\(1\)</span>和<span class="math inline">\(0\)</span>分别定义成<span class="math inline">\(\text{TRUE}\)</span>函数和<span class="math inline">\(\text{FALSE}\)</span>函数。接下来可以定义最基本的非、与、或运算：</p>
-<p><span class="math display">\[
-\begin{cases}
-\text{NOT} &amp;= \lambda x.x\ \text{FALSE}\ \text{TRUE} \\
-\text{AND} &amp;= \lambda x.\lambda y.x\ y\ \text{FALSE} \\
-\text{OR} &amp;= \lambda x.\lambda y. x\ \text{TRUE}\ y \\
-\end{cases}
-\]</span></p>
-<p>上面的三个函数都是利用了<span class="math inline">\(\lambda\)</span>演算中参数可以是函数的性质，输入的<span class="math inline">\(\text{TRUE}\)</span>或<span class="math inline">\(\text{FALSE}\)</span>都可以作为函数继续运算，下面以<span class="math inline">\(\text{AND}\)</span>函数为例进行验证：</p>
-<p><span class="math display">\[
-\begin{align*}
-\text{AND}(\text{FALSE})(\text{FALSE}) &amp;= \text{FALSE}(\text{FALSE})(\text{FALSE}) \\
-&amp;= \text{FALSE}
-\end{align*}
-\]</span></p>
-<p><span class="math display">\[
-\begin{align*}
-\text{AND}(\text{FALSE})(\text{TRUE}) &amp;= \text{FALSE}(\text{TRUE})(\text{FALSE}) \\
-&amp;= \text{FALSE}
-\end{align*}
-\]</span></p>
-<p><span class="math display">\[
-\begin{align*}
-\text{AND}(\text{TRUE})(\text{FALSE}) &amp;= \text{TRUE}(\text{FALSE})(\text{FALSE}) \\
-&amp;= \text{FALSE}
-\end{align*}
-\]</span></p>
-<p><span class="math display">\[
-\begin{align*}
-\text{AND}(\text{TRUE})(\text{TRUE}) &amp;= \text{TRUE}(\text{TRUE})(\text{FALSE}) \\
-&amp;= \text{TRUE}
-\end{align*}
-\]</span></p>
-<p>当且仅当<span class="math inline">\(x\)</span>与<span class="math inline">\(y\)</span>均为<span class="math inline">\(\text{TRUE}\)</span>时，<span class="math inline">\(\text{AND}\)</span>的值为<span class="math inline">\(\text{TRUE}\)</span>。因此，函数<span class="math inline">\(\text{AND}\)</span>的定义正确。</p>
-<h3 id="lambda演算与计算机的联系">3、<span class="math inline">\(\lambda\)</span>演算与计算机的联系</h3>
-<p><span class="math inline">\(\text{TRUE}\)</span>和<span class="math inline">\(\text{FALSE}\)</span>这两个函数的功能用一个词来概括就是“<strong>选择</strong>”，在数字电路中，也有一个可以做选择的模块：<strong>选择器</strong>。选择器有三个输入端口<span class="math inline">\(a\)</span>，<span class="math inline">\(b\)</span>和<span class="math inline">\(sel\)</span>，一个输出端口<span class="math inline">\(y\)</span>，根据<span class="math inline">\(sel\)</span>的值可以决定<span class="math inline">\(y\)</span>的值是和<span class="math inline">\(a\)</span>相同还是和<span class="math inline">\(b\)</span>相同（比如当<span class="math inline">\(sel = \text{TRUE}\)</span>时，<span class="math inline">\(y=a\)</span>；<span class="math inline">\(sel = \text{FALSE}\)</span>时，<span class="math inline">\(y = b\)</span>），类似的，可以构建函数：</p>
-<p><span class="math display">\[\text{MUX} = \lambda a.\lambda b.\lambda sel.sel\ a\ b\]</span></p>
-<p>这个函数看起来有些奇怪，似乎只是把三个参数排列在一起输出了，并不能看出其中的“选择功能”，但是<span class="math inline">\(\lambda\)</span>表达式的特别之处就在于输入的参数可以是函数，从而可以进一步作用在后面的参数上。下面来验证一下的功能：</p>
-<p><span class="math display">\[
-\begin{align*}
-\text{MUX}(a)(b)(\text{TRUE}) &amp;= \text{TRUE}(a)(b) = a \\
-\text{MUX}(a)(b)(\text{FALSE}) &amp;= \text{FALSE}(a)(b) = b \\
-\end{align*}
-\]</span></p>
-<p><span class="math inline">\(\text{MUX}\)</span>函数的工作行为与选择器完全一致！放在硬件中，<span class="math inline">\(\text{MUX}\)</span>函数是选择器，而在软件中，它就是<code>if</code>语句：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> (sel) &#123;<br>  a<br>&#125; <span class="hljs-keyword">else</span> &#123;<br>  b<br>&#125;<br></code></pre></td></tr></table></figure>
-<h2 id="三更进一步">三、更进一步</h2>
-<p>有了<span class="math inline">\(\text{MUX}\)</span>函数，就可以实现宏定义的“条件编译”了，只需要改变一下它0的输入参数即可：</p>
-<p><span class="math display">\[
-\text{MUX}(code\_block, , \text{isdef}(macro))
-\]</span></p>
-<p>其中<code>isdef</code>是在上一篇定义的宏函数，如果<span class="math inline">\(macro\)</span>已经被定义了，它将返回<span class="math inline">\(\text{TRUE}\)</span>，反之返回<span class="math inline">\(\text{FALSE}\)</span>。<span class="math inline">\(code_block\)</span>是在宏<span class="math inline">\(macro\)</span>被定义后希望在预处理时被保留下来的代码块。传给<span class="math inline">\(\text{MUX}\)</span>函数的第二个参数是一个空串，也就是说在<span class="math inline">\(macro\)</span>未被定义时，预处理后会留下一个空串，对于最后的预处理结果没有任何影响。</p>
-<p>通过上面的抽象定义，已经实现了预期的功能，但是到C语言中，还面临着一些细节问题。首先，<code>isdef</code>的值是<code>1</code>或<code>0</code>，而不是上面定义的和函数。这就导致C语言预处理器并不会把<code>isdef</code>替换为<code>1</code>或<code>0</code>后再当作一个“函数”来解释。其次，<code>isdef</code>中使用了<code>strcmp</code>函数，这显然不能在函数外面使用，函数的运行结果在运行时才被计算出来。</p>
-<p>对于第一个问题，如何将<code>isdef</code>的值解释为一个函数呢？由于<code>1</code>和<code>0</code>在C语言中被解释为整型字面量，所以可以给这个<code>1</code>或者<code>0</code>“加点东西”，然后定义新的宏，这里用到了<code>##</code>运算符：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> concat(a, b) a ## b</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MUX_MID(a, b, p, sel) MUX(a, b, concat(p, sel))</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MUX_OUT(a, b, sel) MUX_MID(a, b, PREFIX_, sel)</span><br></code></pre></td></tr></table></figure>
-<p>宏<code>concat</code>将两个参数粘连起来，<code>MUX</code>仍然是上面抽象的函数。假设<code>MUX_OUT</code>的输入参数是<code>(code_block, , isdef(foo)</code>，并且宏<code>foo</code>已经被定义过，先不考虑其他问题，经过宏<code>MUX_MID</code>和<code>concat</code>，最终传入<code>MUX</code>的参数将会变为<code>(code_block, , PREFIX_1)</code>。如果我们继续定义宏函数<code>PREFIX_1</code>和<code>PREFIX_0</code>，就可以解决第一个问题了：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> TRUE(a, b) a</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FALSE(a, b) b</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PREFIX_1(a, b) TRUE(a, b)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PREFIX_0(a, b) FALSE(a, b)\</span><br></code></pre></td></tr></table></figure>
-<p>这里定义的<code>TRUE</code>和<code>FALSE</code>宏函数其实就是上面<span class="math inline">\(\lambda\)</span>演算中的<span class="math inline">\(\text{TRUE}\)</span>和<span class="math inline">\(\text{FALSE}\)</span>！现在，考虑宏<code>MUX</code>怎么定义，我们想要将最后的<code>PREFIX_1</code>或者<code>PREFIX_0</code>作用在<code>a</code>和<code>b</code>上，那么只需要改一下参数的顺序，再加个括号就行了：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MUX(a, b, sel) sel(a, b)</span><br></code></pre></td></tr></table></figure>
-<p>下面来看第二个问题，宏<code>isdef</code>在预处理阶段不会被替换为<code>1</code>或<code>0</code>，因此，不能通过<code>MUX_OUT(a, b, isdef(macro))</code>来使用这个宏，这样肯定是有问题的。需要一个宏，能在预处理阶段就产生<code>1</code>或<code>0</code>的结果。由于我们是在配置编译时使用，所以对于某个选项，要么它被定义了，要么它没被定义，而被定义的宏我们并不在乎它是什么值，所以可以限制为：“一旦定义，就将它定义为<code>t</code>”（这个限制只在本篇中成立）。</p>
-<p>再整理一下，现在需要一个宏，来检测一个“一旦定义，就被一定被定义成<code>t</code>”的宏是否被定义，如果被定义了，预处理时它会被替换成<code>1</code>，否则被替换成<code>0</code>。在这个假设下，被定义了的宏会被替换为<code>t</code>，而没有被定义的宏在预处理阶段会保留为宏名。可以使用刚才的“加点东西”技术，把替换后的<code>t</code>再进一步替换为别的东西：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> choose2nd(a, b, ...) b</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PREFIX_t t,</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> choose2nd_mid(p_macro, a, b) choose2nd(p_macro a, b)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> choose2nd_out(macro, a, b) choose2nd_mid(concat(PREFIX_, macro), a, b)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> IFDEF(macro) choose2nd_out(macro, 1, 0)</span><br></code></pre></td></tr></table></figure>
-<p>这一系列宏的关键之处在于<code>choose2nd_mid</code>宏定义中<code>p_macro</code>和<code>a</code>之间没有逗号，如果<code>macro</code>被定义成了<code>t</code>，则会被替换为“<code>t,</code>”（<code>t</code>后面有一个逗号分隔），从而成为了第二个参数；当未被定义或者被定义成别的，是第二个参数。</p>
-<p>上面的讨论中已经涉及了大部分NEMU框架中所使用的技巧和方法，实现这些宏的思路与<span class="math inline">\(\lambda\)</span>演算关系密切，这种思路也许就是“函数式编程”。</p>
-<h2 id="四参考资料">四、参考资料</h2>
-<ul>
-<li><p><a href="https://github.com/NJU-ProjectN/ics-pa">南京大学ics-pa在github上的项目</a></p></li>
-<li><p><a href="https://www.bilibili.com/video/BV1VA411H7Ym?share_source=copy_web"><span class="math inline">\(\lambda\)</span>演算简介</a></p></li>
-</ul>
-]]></content>
-      <categories>
-        <category>NEMU</category>
-      </categories>
-      <tags>
-        <tag>C语言</tag>
-        <tag>理论计算机科学</tag>
       </tags>
   </entry>
   <entry>
@@ -194,6 +111,169 @@
       </categories>
       <tags>
         <tag>C语言</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>nju-pa摸鱼记2-计算机与λ演算</title>
+    <url>/2022/02/01/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B02-%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%8E%CE%BB%E6%BC%94%E7%AE%97/</url>
+    <content><![CDATA[<h2 id="一前言">一、前言</h2>
+<p>在<a
+href="https://miaohao-oops.github.io/2022/01/31/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B01-%E5%AE%8F%E7%9A%84%E5%A6%99%E7%94%A8/">上一篇</a>中，讨论了如何使用预处理指令或是宏来识别某个宏是否被定义，以实现通过配置进行有选择的编译。不过，仅使用上一篇讨论的<code>isdef</code>宏还不能达到和预处理指令一样的效果，本篇将继续讨论框架中如何使用宏来实现“<strong>如果某个宏被定义，则预处理后保留某些语句或代码块，反之抛弃这些部分</strong>”的功能。之所以提到<span
+class="math inline">\(\lambda\)</span>演算，是由于我在搞明白代码框架中的宏是如何运作之后，发现其颇有“函数式编程”的风格，而<span
+class="math inline">\(\lambda\)</span>演算是函数式编程的基础，遂记录于此。</p>
+<h2 id="二浅谈lambda演算">二、浅谈<span
+class="math inline">\(\lambda\)</span>演算</h2>
+<h3 id="简介">1、简介</h3>
+<p><span
+class="math inline">\(\lambda\)</span>演算是一种和图灵机等价的计算模型（<strong>丘奇-图灵论题</strong>），它可以描述任何可计算问题，又称为“最小的编程语言”。简单来说，<span
+class="math inline">\(\lambda\)</span>演算的核心是<strong>抽象化定义的函数</strong>，它的参数没有类型的限制，可以是数字，函数或者字符串等等。一个最基础的函数是恒等函数：</p>
+<p><span class="math display">\[\lambda x.x\]</span></p>
+<p>其中<span class="math inline">\(\lambda\)</span>后的<span
+class="math inline">\(x\)</span>是这个函数的<strong>输入</strong>，点号后的<span
+class="math inline">\(x\)</span>是函数的<strong>输出</strong>。可以将这个函数作用在变量<span
+class="math inline">\(a\)</span>上，就得到：</p>
+<p><span class="math display">\[\lambda x.x(a) = a\]</span></p>
+<p>通过<strong>柯里化</strong>方法，可以定义二输入函数：</p>
+<p><span class="math display">\[\lambda x.\lambda y.x+y\]</span></p>
+<p>其中<span class="math inline">\(x\)</span>和<span
+class="math inline">\(y\)</span>是该函数的两个输入，该函数的输出是两个输入的和。</p>
+<h3 id="用抽象化函数表示布尔逻辑">2、用抽象化函数表示布尔逻辑</h3>
+<p>在<span
+class="math inline">\(\lambda\)</span>演算中，没有布尔值的概念，但是可以定义两个函数来表示布尔逻辑：</p>
+<p><span class="math display">\[\text{TRUE} = \lambda x.\lambda
+y.x\]</span></p>
+<p><span class="math display">\[\text{FALSE} = \lambda x.\lambda
+y.y\]</span></p>
+<p>用自然语言来描述<span
+class="math inline">\(\text{TRUE}\)</span>函数的作用：“输入两个参数<span
+class="math inline">\(x\)</span>和<span
+class="math inline">\(y\)</span>，输出第一个参数”，<span
+class="math inline">\(\text{FALSE}\)</span>函数的功能同理。这样的话，可以把布尔值<span
+class="math inline">\(1\)</span>和<span
+class="math inline">\(0\)</span>分别定义成<span
+class="math inline">\(\text{TRUE}\)</span>函数和<span
+class="math inline">\(\text{FALSE}\)</span>函数。接下来可以定义最基本的非、与、或运算：</p>
+<p><span class="math display">\[
+\begin{cases}
+\text{NOT} &amp;= \lambda x.x\ \text{FALSE}\ \text{TRUE} \\
+\text{AND} &amp;= \lambda x.\lambda y.x\ y\ \text{FALSE} \\
+\text{OR} &amp;= \lambda x.\lambda y. x\ \text{TRUE}\ y \\
+\end{cases}
+\]</span></p>
+<p>上面的三个函数都是利用了<span
+class="math inline">\(\lambda\)</span>演算中参数可以是函数的性质，输入的<span
+class="math inline">\(\text{TRUE}\)</span>或<span
+class="math inline">\(\text{FALSE}\)</span>都可以作为函数继续运算，下面以<span
+class="math inline">\(\text{AND}\)</span>函数为例进行验证：</p>
+<p><span class="math display">\[
+\begin{align*}
+\text{AND}(\text{FALSE})(\text{FALSE}) &amp;=
+\text{FALSE}(\text{FALSE})(\text{FALSE}) \\
+&amp;= \text{FALSE}
+\end{align*}
+\]</span></p>
+<p><span class="math display">\[
+\begin{align*}
+\text{AND}(\text{FALSE})(\text{TRUE}) &amp;=
+\text{FALSE}(\text{TRUE})(\text{FALSE}) \\
+&amp;= \text{FALSE}
+\end{align*}
+\]</span></p>
+<p><span class="math display">\[
+\begin{align*}
+\text{AND}(\text{TRUE})(\text{FALSE}) &amp;=
+\text{TRUE}(\text{FALSE})(\text{FALSE}) \\
+&amp;= \text{FALSE}
+\end{align*}
+\]</span></p>
+<p><span class="math display">\[
+\begin{align*}
+\text{AND}(\text{TRUE})(\text{TRUE}) &amp;=
+\text{TRUE}(\text{TRUE})(\text{FALSE}) \\
+&amp;= \text{TRUE}
+\end{align*}
+\]</span></p>
+<p>当且仅当<span class="math inline">\(x\)</span>与<span
+class="math inline">\(y\)</span>均为<span
+class="math inline">\(\text{TRUE}\)</span>时，<span
+class="math inline">\(\text{AND}\)</span>的值为<span
+class="math inline">\(\text{TRUE}\)</span>。因此，函数<span
+class="math inline">\(\text{AND}\)</span>的定义正确。</p>
+<h3 id="lambda演算与计算机的联系">3、<span
+class="math inline">\(\lambda\)</span>演算与计算机的联系</h3>
+<p><span class="math inline">\(\text{TRUE}\)</span>和<span
+class="math inline">\(\text{FALSE}\)</span>这两个函数的功能用一个词来概括就是“<strong>选择</strong>”，在数字电路中，也有一个可以做选择的模块：<strong>选择器</strong>。选择器有三个输入端口<span
+class="math inline">\(a\)</span>，<span
+class="math inline">\(b\)</span>和<span
+class="math inline">\(sel\)</span>，一个输出端口<span
+class="math inline">\(y\)</span>，根据<span
+class="math inline">\(sel\)</span>的值可以决定<span
+class="math inline">\(y\)</span>的值是和<span
+class="math inline">\(a\)</span>相同还是和<span
+class="math inline">\(b\)</span>相同（比如当<span
+class="math inline">\(sel = \text{TRUE}\)</span>时，<span
+class="math inline">\(y=a\)</span>；<span class="math inline">\(sel =
+\text{FALSE}\)</span>时，<span class="math inline">\(y =
+b\)</span>），类似的，可以构建函数：</p>
+<p><span class="math display">\[\text{MUX} = \lambda a.\lambda b.\lambda
+sel.sel\ a\ b\]</span></p>
+<p>这个函数看起来有些奇怪，似乎只是把三个参数排列在一起输出了，并不能看出其中的“选择功能”，但是<span
+class="math inline">\(\lambda\)</span>表达式的特别之处就在于输入的参数可以是函数，从而可以进一步作用在后面的参数上。下面来验证一下的功能：</p>
+<p><span class="math display">\[
+\begin{align*}
+\text{MUX}(a)(b)(\text{TRUE}) &amp;= \text{TRUE}(a)(b) = a \\
+\text{MUX}(a)(b)(\text{FALSE}) &amp;= \text{FALSE}(a)(b) = b \\
+\end{align*}
+\]</span></p>
+<p><span
+class="math inline">\(\text{MUX}\)</span>函数的工作行为与选择器完全一致！放在硬件中，<span
+class="math inline">\(\text{MUX}\)</span>函数是选择器，而在软件中，它就是<code>if</code>语句：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> (sel) &#123;<br>  a<br>&#125; <span class="hljs-keyword">else</span> &#123;<br>  b<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="三更进一步">三、更进一步</h2>
+<p>有了<span
+class="math inline">\(\text{MUX}\)</span>函数，就可以实现宏定义的“条件编译”了，只需要改变一下它0的输入参数即可：</p>
+<p><span class="math display">\[
+\text{MUX}(code\_block, , \text{isdef}(macro))
+\]</span></p>
+<p>其中<code>isdef</code>是在上一篇定义的宏函数，如果<span
+class="math inline">\(macro\)</span>已经被定义了，它将返回<span
+class="math inline">\(\text{TRUE}\)</span>，反之返回<span
+class="math inline">\(\text{FALSE}\)</span>。<span
+class="math inline">\(code_block\)</span>是在宏<span
+class="math inline">\(macro\)</span>被定义后希望在预处理时被保留下来的代码块。传给<span
+class="math inline">\(\text{MUX}\)</span>函数的第二个参数是一个空串，也就是说在<span
+class="math inline">\(macro\)</span>未被定义时，预处理后会留下一个空串，对于最后的预处理结果没有任何影响。</p>
+<p>通过上面的抽象定义，已经实现了预期的功能，但是到C语言中，还面临着一些细节问题。首先，<code>isdef</code>的值是<code>1</code>或<code>0</code>，而不是上面定义的和函数。这就导致C语言预处理器并不会把<code>isdef</code>替换为<code>1</code>或<code>0</code>后再当作一个“函数”来解释。其次，<code>isdef</code>中使用了<code>strcmp</code>函数，这显然不能在函数外面使用，函数的运行结果在运行时才被计算出来。</p>
+<p>对于第一个问题，如何将<code>isdef</code>的值解释为一个函数呢？由于<code>1</code>和<code>0</code>在C语言中被解释为整型字面量，所以可以给这个<code>1</code>或者<code>0</code>“加点东西”，然后定义新的宏，这里用到了<code>##</code>运算符：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> concat(a, b) a ## b</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MUX_MID(a, b, p, sel) MUX(a, b, concat(p, sel))</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MUX_OUT(a, b, sel) MUX_MID(a, b, PREFIX_, sel)</span><br></code></pre></td></tr></table></figure>
+<p>宏<code>concat</code>将两个参数粘连起来，<code>MUX</code>仍然是上面抽象的函数。假设<code>MUX_OUT</code>的输入参数是<code>(code_block, , isdef(foo)</code>，并且宏<code>foo</code>已经被定义过，先不考虑其他问题，经过宏<code>MUX_MID</code>和<code>concat</code>，最终传入<code>MUX</code>的参数将会变为<code>(code_block, , PREFIX_1)</code>。如果我们继续定义宏函数<code>PREFIX_1</code>和<code>PREFIX_0</code>，就可以解决第一个问题了：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> TRUE(a, b) a</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FALSE(a, b) b</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PREFIX_1(a, b) TRUE(a, b)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PREFIX_0(a, b) FALSE(a, b)\</span><br></code></pre></td></tr></table></figure>
+<p>这里定义的<code>TRUE</code>和<code>FALSE</code>宏函数其实就是上面<span
+class="math inline">\(\lambda\)</span>演算中的<span
+class="math inline">\(\text{TRUE}\)</span>和<span
+class="math inline">\(\text{FALSE}\)</span>！现在，考虑宏<code>MUX</code>怎么定义，我们想要将最后的<code>PREFIX_1</code>或者<code>PREFIX_0</code>作用在<code>a</code>和<code>b</code>上，那么只需要改一下参数的顺序，再加个括号就行了：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MUX(a, b, sel) sel(a, b)</span><br></code></pre></td></tr></table></figure>
+<p>下面来看第二个问题，宏<code>isdef</code>在预处理阶段不会被替换为<code>1</code>或<code>0</code>，因此，不能通过<code>MUX_OUT(a, b, isdef(macro))</code>来使用这个宏，这样肯定是有问题的。需要一个宏，能在预处理阶段就产生<code>1</code>或<code>0</code>的结果。由于我们是在配置编译时使用，所以对于某个选项，要么它被定义了，要么它没被定义，而被定义的宏我们并不在乎它是什么值，所以可以限制为：“一旦定义，就将它定义为<code>t</code>”（这个限制只在本篇中成立）。</p>
+<p>再整理一下，现在需要一个宏，来检测一个“一旦定义，就被一定被定义成<code>t</code>”的宏是否被定义，如果被定义了，预处理时它会被替换成<code>1</code>，否则被替换成<code>0</code>。在这个假设下，被定义了的宏会被替换为<code>t</code>，而没有被定义的宏在预处理阶段会保留为宏名。可以使用刚才的“加点东西”技术，把替换后的<code>t</code>再进一步替换为别的东西：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> choose2nd(a, b, ...) b</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PREFIX_t t,</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> choose2nd_mid(p_macro, a, b) choose2nd(p_macro a, b)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> choose2nd_out(macro, a, b) choose2nd_mid(concat(PREFIX_, macro), a, b)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> IFDEF(macro) choose2nd_out(macro, 1, 0)</span><br></code></pre></td></tr></table></figure>
+<p>这一系列宏的关键之处在于<code>choose2nd_mid</code>宏定义中<code>p_macro</code>和<code>a</code>之间没有逗号，如果<code>macro</code>被定义成了<code>t</code>，则会被替换为“<code>t,</code>”（<code>t</code>后面有一个逗号分隔），从而成为了第二个参数；当未被定义或者被定义成别的，是第二个参数。</p>
+<p>上面的讨论中已经涉及了大部分NEMU框架中所使用的技巧和方法，实现这些宏的思路与<span
+class="math inline">\(\lambda\)</span>演算关系密切，这种思路也许就是“函数式编程”。</p>
+<h2 id="四参考资料">四、参考资料</h2>
+<ul>
+<li><p><a
+href="https://github.com/NJU-ProjectN/ics-pa">南京大学ics-pa在github上的项目</a></p></li>
+<li><p><a
+href="https://www.bilibili.com/video/BV1VA411H7Ym?share_source=copy_web"><span
+class="math inline">\(\lambda\)</span>演算简介</a></p></li>
+</ul>
+]]></content>
+      <categories>
+        <category>NEMU</category>
+      </categories>
+      <tags>
+        <tag>C语言</tag>
+        <tag>理论计算机科学</tag>
       </tags>
   </entry>
   <entry>
