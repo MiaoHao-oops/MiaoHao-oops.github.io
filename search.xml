@@ -1,19 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>My First Article</title>
-    <url>/2022/02/02/My-First-Article/</url>
-    <content><![CDATA[<h2 id="chapter-1">Chapter 1</h2>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Hello, World!\n&quot;</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
-<h2 id="chapter-2">Chapter 2</h2>
-<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  std::cout &lt;&lt; <span class="hljs-string">&quot;Hello, World!\n&quot;</span>;<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
-<h2 id="chapter-3">Chapter 3</h2>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash">!/usr/bin/bash</span><br>echo &quot;Hello, World!&quot;<br></code></pre></td></tr></table></figure>
-<h2 id="chapter-4">Chapter 4</h2>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><code class="hljs ruby"><span class="hljs-meta">#!/usr/bin/ruby</span><br>puts <span class="hljs-string">&quot;Hello, World!&quot;</span><br></code></pre></td></tr></table></figure>
-<h2 id="chapter-5">Chapter 5</h2>
-<figure class="highlight python"><table><tr><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python</span><br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Hello, World!&quot;</span>)<br></code></pre></td></tr></table></figure>
+    <title>LR(0)分析方法</title>
+    <url>/2022/03/29/LR-0-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95/</url>
+    <content><![CDATA[<h2 id="基本概念">基本概念</h2>
+<h3 id="项目-item">项目 item</h3>
+<blockquote>
+<p>项目是对文法中产生式的扩展，通过在产生式右部添加<span class="math inline">\(\cdot\)</span>的方法来表示语法分析器在分析过程中的某个状态。</p>
+</blockquote>
+<p>例子：</p>
+<p>对于产生式<span class="math inline">\(A\rightarrow \alpha X\)</span>，它产生以下几个项：</p>
+<p><span class="math display">\[
+\begin{align}
+A&amp;\rightarrow \cdot \alpha X &amp;(1)\\ 
+A&amp;\rightarrow \alpha \cdot X &amp;(2)\\ 
+A&amp;\rightarrow \alpha X \cdot &amp;(3)\\ 
+\end{align}
+\]</span></p>
+<p>其中，</p>
+<ul>
+<li><p>式<span class="math inline">\((1)\)</span>的点号右侧是一个终结符，意味着在当前状态下，分析器期待从输入流中读入符号<span class="math inline">\(\alpha\)</span>，因此它被定义为一个<strong>移入项</strong>。</p></li>
+<li><p>式<span class="math inline">\((2)\)</span>中点号右侧是一个非终结符，此时分析器期待后面的输入归约得到非终结符<span class="math inline">\(X\)</span>，因此它被定义为一个<strong>待约项</strong>。</p></li>
+<li><p>式<span class="math inline">\((3)\)</span>的点号位于整个产生式的结尾，此时意味着分析器将进行归约操作，将<span class="math inline">\(\alpha X\)</span>归约为<span class="math inline">\(A\)</span>，因此它被定义为一个<strong>归约项</strong>。</p></li>
+</ul>
+<h3 id="增广文法-augmented-grammar">增广文法 augmented grammar</h3>
+<p>为了得到唯一的终止产生式，定义一个文法<span class="math inline">\(G\)</span>的增广文法<span class="math inline">\(G^{\prime}\)</span>：</p>
+<blockquote>
+<p>对于文法<span class="math inline">\(G\)</span>的开始符号<span class="math inline">\(S\)</span>，将产生式<span class="math inline">\(S^{\prime}\rightarrow S\)</span>添加到<span class="math inline">\(G\)</span>中，就得到了文法<span class="math inline">\(G^{\prime}\)</span>。</p>
+</blockquote>
+<p>这样，当分析器进入状态<span class="math inline">\(S^{\prime}\rightarrow S\cdot\)</span>时，如果输入流已经读完，就表示进入了接受状态。</p>
+<h3 id="textclosure函数"><span class="math inline">\(\text{CLOSURE}\)</span>函数</h3>
+<p><span class="math inline">\(\text{CLOSURE}\)</span>函数将一个项目集合映射到另一个项目集合，它的输入是项目集合<span class="math inline">\(I\)</span>，输出是该项目集合的闭包<span class="math inline">\(\text{CLOSURE}(I)\)</span>。它的意义在于将一些在状态上等价的项聚集起来形成一个状态，而不是对于文法的每一个项作为一个状态，避免语法分析器的状态数过多。定义<span class="math inline">\(\text{CLOSURE}(I)\)</span>：</p>
+<blockquote>
+<ol type="1">
+<li>初始，<span class="math inline">\(\text{CLOSURE}(I) = \phi\)</span></li>
+<li><span class="math inline">\(\text{CLOSURE}(I) = \text{CLOSURE}(I)\cup I\)</span></li>
+<li>如果<span class="math inline">\(A\rightarrow \alpha \cdot B \beta \in \text{CLOSURE}(I)\)</span>，并且<span class="math inline">\(\exists B\rightarrow \cdot \gamma \notin \text{CLOSURE}(I)\)</span>，那么<span class="math inline">\(\text{CLOSURE}(I) = \text{CLOSURE}(I)\cup B\rightarrow \cdot \gamma\)</span></li>
+</ol>
+</blockquote>
+<p>不断重复<span class="math inline">\((3)\)</span>直到没有新的项能添加到<span class="math inline">\(\text{CLOSURE}(I)\)</span>中。上面各式的含义是：</p>
+<ul>
+<li><p><span class="math inline">\((2)\)</span>的含义是所有<span class="math inline">\(I\)</span>中的项都在<span class="math inline">\(I\)</span>的闭包中</p></li>
+<li><p><span class="math inline">\((3)\)</span>的含义是如果<span class="math inline">\(\text{CLOSURE}(I)\)</span>中某个项的点号的右侧是一个非终结符，那么以该非终结符为左部且点号在右部最左侧的项也在<span class="math inline">\(\text{CLOSURE}(I)\)</span>中。进一步也就是说如果此时分析器期待对非终结符<span class="math inline">\(B\)</span>的归约，那么它也同样期待着由<span class="math inline">\(B\)</span>产生的那些符号，因为只有那些符号才能归约成<span class="math inline">\(B\)</span>。</p></li>
+</ul>
+<h3 id="textgoto函数"><span class="math inline">\(\text{GOTO}\)</span>函数</h3>
+<p><span class="math inline">\(\text{GOTO}\)</span>函数也将一个项目集合映射到另一个项目集合，它的输入是项目集合<span class="math inline">\(I\)</span>和一个文法符号<span class="math inline">\(X\)</span>，输出是该项目集合中所有项遇到文法符号<span class="math inline">\(X\)</span>后所有后继项的闭包。</p>
+<blockquote>
+<p>后继项：对于项<span class="math inline">\(A\rightarrow X\cdot YZ\)</span>而言，它的后继项就是将点号移动到项右部的下一个文法符号，即<span class="math inline">\(A\rightarrow XY\cdot Z\)</span>。</p>
+</blockquote>
+<p>它的意义是求出分析器状态机中的所有状态转移。定义<span class="math inline">\(\text{GOTO}\)</span>函数：</p>
+<blockquote>
+<p><span class="math inline">\(\text{GOTO}(I, X) = \text{CLOSURE}(\{A\rightarrow \alpha X\cdot \beta \ |\ \forall A\rightarrow \alpha \cdot X \beta \in I \})\)</span></p>
+</blockquote>
+<h3 id="规范textlr0项集族-canonical-lr0-collection">规范<span class="math inline">\(\text{LR}(0)\)</span>项集族 canonical LR(0) collection</h3>
+<p>所谓项集族，指的是项目集合的集合，也就是说项集族中每一个元素都是一个项目的集合。利用<span class="math inline">\(\text{CLOSURE}\)</span>函数和<span class="math inline">\(\text{GOTO}\)</span>函数，可以构造出一个文法的规范<span class="math inline">\(\text{LR}(0)\)</span>项集族。定义规范<span class="math inline">\(\text{LR}(0)\)</span>项集族：</p>
+<blockquote>
+<p><span class="math inline">\(C = \{I_{0}\}\cup \{I\ |\ \exists J\in C, X\in V_{N}\cup V_{T}, I = \text{GOTO}(J, X)\}\)</span></p>
+</blockquote>
+<p>上面表达式的含义是：</p>
+<ul>
+<li><p><span class="math inline">\(C\)</span>中包含了项<span class="math inline">\(S^{\prime}\rightarrow \cdot S\)</span>的闭包。</p></li>
+<li><p>对<span class="math inline">\(C\)</span>中的每一个项目集合<span class="math inline">\(I\)</span>和文法中每一个符号<span class="math inline">\(X\)</span>，如果<span class="math inline">\(\text{GOTO}(I, X)\)</span>不在<span class="math inline">\(C\)</span>中，则将其添加到<span class="math inline">\(C\)</span>中。</p></li>
+</ul>
+<h2 id="textlr0分析器"><span class="math inline">\(\text{LR}(0)\)</span>分析器</h2>
+<h3 id="textlr0分析表的结构"><span class="math inline">\(\text{LR}(0)\)</span>分析表的结构</h3>
+<p><span class="math inline">\(\text{LR}(0)\)</span>分析表是一个二维表格，它的行数等于文法<span class="math inline">\(G\)</span>的规范<span class="math inline">\(\text{LR}(0)\)</span>项集族中元素个数，列数等于<span class="math inline">\(G\)</span>中文法符号的个数。分析表中的每一个单元表示在某个状态下遇到某个文法符号时，下一步需要进行的操作。整个分析表被划分为<span class="math inline">\(\text{ACTION}\)</span>和<span class="math inline">\(\text{GOTO}\)</span>两个区域，落入对应区域的单元分别表示遇到终结符和非终结符时所进行的操作。</p>
+<p>对于<span class="math inline">\(\text{ACTION}\)</span>：</p>
+<ul>
+<li><p>如果为<span class="math inline">\(s_{i}\)</span>，则表示移入（shift）操作，分析器将输入指针指向的符号移入符号栈，然后将状态<span class="math inline">\(S_{i}\)</span>移入状态栈。</p></li>
+<li><p>如果为<span class="math inline">\(r_{i}\)</span>，则表示归约（reduce）操作，分析器将使用第<span class="math inline">\(i\)</span>个产生式对符号栈顶的句柄进行归约操作。</p></li>
+</ul>
+<p>对于<span class="math inline">\(\text{GOTO}\)</span>，单元格中所有的元素都是数字，<span class="math inline">\(j = \text{GOTO}[S_{i}, X]\)</span>表示状态<span class="math inline">\(S_{i}\)</span>遇到栈顶为非终结符<span class="math inline">\(X\)</span>时将状态<span class="math inline">\(S_{j}\)</span>入栈。</p>
+<h3 id="textlr0分析器的结构"><span class="math inline">\(\text{LR}(0)\)</span>分析器的结构</h3>
+<p><span class="math inline">\(\text{LR}(0)\)</span>分析器包含4个主要部分：</p>
+<ul>
+<li><p>输入缓冲</p></li>
+<li><p>符号和状态栈</p></li>
+<li><p><span class="math inline">\(\text{LR}(0)\)</span>分析表</p></li>
+<li><p>驱动程序</p></li>
+</ul>
+<p>它的运行中的格局是：</p>
+<ol type="1">
+<li>初始格局为：</li>
+</ol>
+<p><span class="math display">\[\begin{align}
+&amp;S_{0} \\
+&amp;\$ &amp;a_{1}a_{2}\cdots a_{n}\$\\
+\end{align}\]</span></p>
+<p>其中<span class="math inline">\(S_{0}\)</span>表示初始状态，对应<span class="math inline">\(S^{\prime}\rightarrow \cdot S\)</span>的项目集闭包。</p>
+<ol start="2" type="1">
+<li>假设运行时的一个格局是：</li>
+</ol>
+<p><span class="math display">\[\begin{align}
+&amp;S_{0}S_{1}S_{2}\cdots S_{m} \\
+&amp;\$ X_{1}X_{2}\cdots X_{m} &amp;a_{i}a_{i + 1}\cdots a_{n}\$\\
+\end{align}\]</span></p>
+<ul>
+<li><p>若<span class="math inline">\(\text{ACTION}[S_{m}, a_{i}] = s_{x}\)</span>，则进行移入操作，格局变为： <span class="math display">\[\begin{align}
+&amp;S_{0}S_{1}S_{2}\cdots S_{m}S_{x} \\
+&amp;\$ X_{1}X_{2}\cdots X_{m}a_{i} &amp;a_{i + 1}\cdots a_{n}\$\\
+  \end{align}\]</span></p></li>
+<li><p>若<span class="math inline">\(\text{ACTION}[S_{m}, a_{i}] = r_{x}\)</span>，则进行归约操作，使用第<span class="math inline">\(x\)</span>个产生式<span class="math inline">\(A\rightarrow X_{m - (k - 1)}\cdots X_{m}\)</span>，格局变为： <span class="math display">\[\begin{align}
+&amp;S_{0}S_{1}S_{2}\cdots S_{m - k} \\
+&amp;\$ X_{1}X_{2}\cdots X_{m - k}A &amp;a_{i}a_{i + 1}\cdots a_{n}\$\\
+  \end{align}\]</span></p></li>
+</ul>
+<p>而后查找<span class="math inline">\(\text{GOTO}\)</span>表，若<span class="math inline">\(\text{GOTO}[S_{m - k}, A] = y\)</span>，则进行状态转移，格局变为：</p>
+<p><span class="math display">\[\begin{align}
+&amp;S_{0}S_{1}S_{2}\cdots S_{m - k}S_{y} \\
+&amp;\$ X_{1}X_{2}\cdots X_{m - k}A &amp;a_{i}a_{i + 1}\cdots a_{n}\$\\
+  \end{align}\]</span></p>
+<ul>
+<li>若<span class="math inline">\(\text{ACTION}[S_{m}, a_{i}] = \text{acc}\)</span>，则分析成功。</li>
+<li>若<span class="math inline">\(\text{ACTION}[S_{m}, a_{i}] = \text{err}\)</span>，则分析失败。</li>
+</ul>
+<h3 id="构造textlr0分析表">构造<span class="math inline">\(\text{LR}(0)\)</span>分析表</h3>
+<p>构造<span class="math inline">\(\text{LR}(0)\)</span>分析表的方法是：</p>
+<ol type="1">
+<li><p>首先求文法<span class="math inline">\(G\)</span>的<span class="math inline">\(\text{LR}(0)\)</span>项集族<span class="math inline">\(C\)</span></p></li>
+<li><p>对于<span class="math inline">\(C\)</span>中的每一个项目集<span class="math inline">\(I\)</span>：</p>
+<ol type="1">
+<li><p>如果<span class="math inline">\(\text{GOTO}(I, \alpha) = I^{\prime}\)</span>，则<span class="math inline">\(\text{ACTION}[I, \alpha] = S_{I^{\prime}}\)</span></p></li>
+<li><p>如果<span class="math inline">\(\text{GOTO}(I, A) = I^{\prime}\)</span>，则<span class="math inline">\(\text{GOTO}[I, A] = I^{\prime}\)</span></p></li>
+<li><p>如果<span class="math inline">\(I\)</span>中有归约项，则<span class="math inline">\(\forall \alpha, \text{ACTION}[I, \alpha] = r_{x}\)</span>，其中<span class="math inline">\(x\)</span>为归约项对应产生式的编号</p></li>
+</ol></li>
+</ol>
 ]]></content>
+      <categories>
+        <category>note</category>
+      </categories>
+      <tags>
+        <tag>编译原理</tag>
+      </tags>
   </entry>
   <entry>
     <title>Hello World</title>
@@ -73,6 +191,21 @@
       <tags>
         <tag>C语言</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>My First Article</title>
+    <url>/2022/02/02/My-First-Article/</url>
+    <content><![CDATA[<h2 id="chapter-1">Chapter 1</h2>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Hello, World!\n&quot;</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="chapter-2">Chapter 2</h2>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  std::cout &lt;&lt; <span class="hljs-string">&quot;Hello, World!\n&quot;</span>;<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="chapter-3">Chapter 3</h2>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash">!/usr/bin/bash</span><br>echo &quot;Hello, World!&quot;<br></code></pre></td></tr></table></figure>
+<h2 id="chapter-4">Chapter 4</h2>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><code class="hljs ruby"><span class="hljs-meta">#!/usr/bin/ruby</span><br>puts <span class="hljs-string">&quot;Hello, World!&quot;</span><br></code></pre></td></tr></table></figure>
+<h2 id="chapter-5">Chapter 5</h2>
+<figure class="highlight python"><table><tr><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python</span><br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Hello, World!&quot;</span>)<br></code></pre></td></tr></table></figure>
+]]></content>
   </entry>
   <entry>
     <title>nju-pa摸鱼记2-计算机与λ演算</title>
@@ -255,139 +388,6 @@
       </tags>
   </entry>
   <entry>
-    <title>LR(0)分析方法</title>
-    <url>/2022/03/29/LR-0-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95/</url>
-    <content><![CDATA[<h2 id="基本概念">基本概念</h2>
-<h3 id="项目-item">项目 item</h3>
-<blockquote>
-<p>项目是对文法中产生式的扩展，通过在产生式右部添加<span class="math inline">\(\cdot\)</span>的方法来表示语法分析器在分析过程中的某个状态。</p>
-</blockquote>
-<p>例子：</p>
-<p>对于产生式<span class="math inline">\(A\rightarrow \alpha X\)</span>，它产生以下几个项：</p>
-<p><span class="math display">\[
-\begin{align}
-A&amp;\rightarrow \cdot \alpha X &amp;(1)\\ 
-A&amp;\rightarrow \alpha \cdot X &amp;(2)\\ 
-A&amp;\rightarrow \alpha X \cdot &amp;(3)\\ 
-\end{align}
-\]</span></p>
-<p>其中，</p>
-<ul>
-<li><p>式<span class="math inline">\((1)\)</span>的点号右侧是一个终结符，意味着在当前状态下，分析器期待从输入流中读入符号<span class="math inline">\(\alpha\)</span>，因此它被定义为一个<strong>移入项</strong>。</p></li>
-<li><p>式<span class="math inline">\((2)\)</span>中点号右侧是一个非终结符，此时分析器期待后面的输入归约得到非终结符<span class="math inline">\(X\)</span>，因此它被定义为一个<strong>待约项</strong>。</p></li>
-<li><p>式<span class="math inline">\((3)\)</span>的点号位于整个产生式的结尾，此时意味着分析器将进行归约操作，将<span class="math inline">\(\alpha X\)</span>归约为<span class="math inline">\(A\)</span>，因此它被定义为一个<strong>归约项</strong>。</p></li>
-</ul>
-<h3 id="增广文法-augmented-grammar">增广文法 augmented grammar</h3>
-<p>为了得到唯一的终止产生式，定义一个文法<span class="math inline">\(G\)</span>的增广文法<span class="math inline">\(G^{\prime}\)</span>：</p>
-<blockquote>
-<p>对于文法<span class="math inline">\(G\)</span>的开始符号<span class="math inline">\(S\)</span>，将产生式<span class="math inline">\(S^{\prime}\rightarrow S\)</span>添加到<span class="math inline">\(G\)</span>中，就得到了文法<span class="math inline">\(G^{\prime}\)</span>。</p>
-</blockquote>
-<p>这样，当分析器进入状态<span class="math inline">\(S^{\prime}\rightarrow S\cdot\)</span>时，如果输入流已经读完，就表示进入了接受状态。</p>
-<h3 id="textclosure函数"><span class="math inline">\(\text{CLOSURE}\)</span>函数</h3>
-<p><span class="math inline">\(\text{CLOSURE}\)</span>函数将一个项目集合映射到另一个项目集合，它的输入是项目集合<span class="math inline">\(I\)</span>，输出是该项目集合的闭包<span class="math inline">\(\text{CLOSURE}(I)\)</span>。它的意义在于将一些在状态上等价的项聚集起来形成一个状态，而不是对于文法的每一个项作为一个状态，避免语法分析器的状态数过多。定义<span class="math inline">\(\text{CLOSURE}(I)\)</span>：</p>
-<blockquote>
-<ol type="1">
-<li>初始，<span class="math inline">\(\text{CLOSURE}(I) = \phi\)</span></li>
-<li><span class="math inline">\(\text{CLOSURE}(I) = \text{CLOSURE}(I)\cup I\)</span></li>
-<li>如果<span class="math inline">\(A\rightarrow \alpha \cdot B \beta \in \text{CLOSURE}(I)\)</span>，并且<span class="math inline">\(\exists B\rightarrow \cdot \gamma \notin \text{CLOSURE}(I)\)</span>，那么<span class="math inline">\(\text{CLOSURE}(I) = \text{CLOSURE}(I)\cup B\rightarrow \cdot \gamma\)</span></li>
-</ol>
-</blockquote>
-<p>不断重复<span class="math inline">\((3)\)</span>直到没有新的项能添加到<span class="math inline">\(\text{CLOSURE}(I)\)</span>中。上面各式的含义是：</p>
-<ul>
-<li><p><span class="math inline">\((2)\)</span>的含义是所有<span class="math inline">\(I\)</span>中的项都在<span class="math inline">\(I\)</span>的闭包中</p></li>
-<li><p><span class="math inline">\((3)\)</span>的含义是如果<span class="math inline">\(\text{CLOSURE}(I)\)</span>中某个项的点号的右侧是一个非终结符，那么以该非终结符为左部且点号在右部最左侧的项也在<span class="math inline">\(\text{CLOSURE}(I)\)</span>中。进一步也就是说如果此时分析器期待对非终结符<span class="math inline">\(B\)</span>的归约，那么它也同样期待着由<span class="math inline">\(B\)</span>产生的那些符号，因为只有那些符号才能归约成<span class="math inline">\(B\)</span>。</p></li>
-</ul>
-<h3 id="textgoto函数"><span class="math inline">\(\text{GOTO}\)</span>函数</h3>
-<p><span class="math inline">\(\text{GOTO}\)</span>函数也将一个项目集合映射到另一个项目集合，它的输入是项目集合<span class="math inline">\(I\)</span>和一个文法符号<span class="math inline">\(X\)</span>，输出是该项目集合中所有项遇到文法符号<span class="math inline">\(X\)</span>后所有后继项的闭包。</p>
-<blockquote>
-<p>后继项：对于项<span class="math inline">\(A\rightarrow X\cdot YZ\)</span>而言，它的后继项就是将点号移动到项右部的下一个文法符号，即<span class="math inline">\(A\rightarrow XY\cdot Z\)</span>。</p>
-</blockquote>
-<p>它的意义是求出分析器状态机中的所有状态转移。定义<span class="math inline">\(\text{GOTO}\)</span>函数：</p>
-<blockquote>
-<p><span class="math inline">\(\text{GOTO}(I, X) = \text{CLOSURE}(\{A\rightarrow \alpha X\cdot \beta \ |\ \forall A\rightarrow \alpha \cdot X \beta \in I \})\)</span></p>
-</blockquote>
-<h3 id="规范textlr0项集族-canonical-lr0-collection">规范<span class="math inline">\(\text{LR}(0)\)</span>项集族 canonical LR(0) collection</h3>
-<p>所谓项集族，指的是项目集合的集合，也就是说项集族中每一个元素都是一个项目的集合。利用<span class="math inline">\(\text{CLOSURE}\)</span>函数和<span class="math inline">\(\text{GOTO}\)</span>函数，可以构造出一个文法的规范<span class="math inline">\(\text{LR}(0)\)</span>项集族。定义规范<span class="math inline">\(\text{LR}(0)\)</span>项集族：</p>
-<blockquote>
-<p><span class="math inline">\(C = \{I_{0}\}\cup \{I\ |\ \exists J\in C, X\in V_{N}\cup V_{T}, I = \text{GOTO}(J, X)\}\)</span></p>
-</blockquote>
-<p>上面表达式的含义是：</p>
-<ul>
-<li><p><span class="math inline">\(C\)</span>中包含了项<span class="math inline">\(S^{\prime}\rightarrow \cdot S\)</span>的闭包。</p></li>
-<li><p>对<span class="math inline">\(C\)</span>中的每一个项目集合<span class="math inline">\(I\)</span>和文法中每一个符号<span class="math inline">\(X\)</span>，如果<span class="math inline">\(\text{GOTO}(I, X)\)</span>不在<span class="math inline">\(C\)</span>中，则将其添加到<span class="math inline">\(C\)</span>中。</p></li>
-</ul>
-<h2 id="textlr0分析器"><span class="math inline">\(\text{LR}(0)\)</span>分析器</h2>
-<h3 id="textlr0分析表的结构"><span class="math inline">\(\text{LR}(0)\)</span>分析表的结构</h3>
-<p><span class="math inline">\(\text{LR}(0)\)</span>分析表是一个二维表格，它的行数等于文法<span class="math inline">\(G\)</span>的规范<span class="math inline">\(\text{LR}(0)\)</span>项集族中元素个数，列数等于<span class="math inline">\(G\)</span>中文法符号的个数。分析表中的每一个单元表示在某个状态下遇到某个文法符号时，下一步需要进行的操作。整个分析表被划分为<span class="math inline">\(\text{ACTION}\)</span>和<span class="math inline">\(\text{GOTO}\)</span>两个区域，落入对应区域的单元分别表示遇到终结符和非终结符时所进行的操作。</p>
-<p>对于<span class="math inline">\(\text{ACTION}\)</span>：</p>
-<ul>
-<li><p>如果为<span class="math inline">\(s_{i}\)</span>，则表示移入（shift）操作，分析器将输入指针指向的符号移入符号栈，然后将状态<span class="math inline">\(S_{i}\)</span>移入状态栈。</p></li>
-<li><p>如果为<span class="math inline">\(r_{i}\)</span>，则表示归约（reduce）操作，分析器将使用第<span class="math inline">\(i\)</span>个产生式对符号栈顶的句柄进行归约操作。</p></li>
-</ul>
-<p>对于<span class="math inline">\(\text{GOTO}\)</span>，单元格中所有的元素都是数字，<span class="math inline">\(j = \text{GOTO}[S_{i}, X]\)</span>表示状态<span class="math inline">\(S_{i}\)</span>遇到栈顶为非终结符<span class="math inline">\(X\)</span>时将状态<span class="math inline">\(S_{j}\)</span>入栈。</p>
-<h3 id="textlr0分析器的结构"><span class="math inline">\(\text{LR}(0)\)</span>分析器的结构</h3>
-<p><span class="math inline">\(\text{LR}(0)\)</span>分析器包含4个主要部分：</p>
-<ul>
-<li><p>输入缓冲</p></li>
-<li><p>符号和状态栈</p></li>
-<li><p><span class="math inline">\(\text{LR}(0)\)</span>分析表</p></li>
-<li><p>驱动程序</p></li>
-</ul>
-<p>它的运行中的格局是：</p>
-<ol type="1">
-<li>初始格局为：</li>
-</ol>
-<p><span class="math display">\[\begin{align}
-&amp;S_{0} \\
-&amp;\$ &amp;a_{1}a_{2}\cdots a_{n}\$\\
-\end{align}\]</span></p>
-<p>其中<span class="math inline">\(S_{0}\)</span>表示初始状态，对应<span class="math inline">\(S^{\prime}\rightarrow \cdot S\)</span>的项目集闭包。</p>
-<ol start="2" type="1">
-<li>假设运行时的一个格局是：</li>
-</ol>
-<p><span class="math display">\[\begin{align}
-&amp;S_{0}S_{1}S_{2}\cdots S_{m} \\
-&amp;\$ X_{1}X_{2}\cdots X_{m} &amp;a_{i}a_{i + 1}\cdots a_{n}\$\\
-\end{align}\]</span></p>
-<ul>
-<li><p>若<span class="math inline">\(\text{ACTION}[S_{m}, a_{i}] = s_{x}\)</span>，则进行移入操作，格局变为： <span class="math display">\[\begin{align}
-&amp;S_{0}S_{1}S_{2}\cdots S_{m}S_{x} \\
-&amp;\$ X_{1}X_{2}\cdots X_{m}a_{i} &amp;a_{i + 1}\cdots a_{n}\$\\
-  \end{align}\]</span></p></li>
-<li><p>若<span class="math inline">\(\text{ACTION}[S_{m}, a_{i}] = r_{x}\)</span>，则进行归约操作，使用第<span class="math inline">\(x\)</span>个产生式<span class="math inline">\(A\rightarrow X_{m - (k - 1)}\cdots X_{m}\)</span>，格局变为： <span class="math display">\[\begin{align}
-&amp;S_{0}S_{1}S_{2}\cdots S_{m - k} \\
-&amp;\$ X_{1}X_{2}\cdots X_{m - k}A &amp;a_{i}a_{i + 1}\cdots a_{n}\$\\
-  \end{align}\]</span></p></li>
-</ul>
-<p>而后查找<span class="math inline">\(\text{GOTO}\)</span>表，若<span class="math inline">\(\text{GOTO}[S_{m - k}, A] = y\)</span>，则进行状态转移，格局变为：</p>
-<p><span class="math display">\[\begin{align}
-&amp;S_{0}S_{1}S_{2}\cdots S_{m - k}S_{y} \\
-&amp;\$ X_{1}X_{2}\cdots X_{m - k}A &amp;a_{i}a_{i + 1}\cdots a_{n}\$\\
-  \end{align}\]</span></p>
-<ul>
-<li>若<span class="math inline">\(\text{ACTION}[S_{m}, a_{i}] = \text{acc}\)</span>，则分析成功。</li>
-<li>若<span class="math inline">\(\text{ACTION}[S_{m}, a_{i}] = \text{err}\)</span>，则分析失败。</li>
-</ul>
-<h3 id="构造textlr0分析表">构造<span class="math inline">\(\text{LR}(0)\)</span>分析表</h3>
-<p>构造<span class="math inline">\(\text{LR}(0)\)</span>分析表的方法是：</p>
-<ol type="1">
-<li><p>首先求文法<span class="math inline">\(G\)</span>的<span class="math inline">\(\text{LR}(0)\)</span>项集族<span class="math inline">\(C\)</span></p></li>
-<li><p>对于<span class="math inline">\(C\)</span>中的每一个项目集<span class="math inline">\(I\)</span>：</p>
-<ol type="1">
-<li><p>如果<span class="math inline">\(\text{GOTO}(I, \alpha) = I^{\prime}\)</span>，则<span class="math inline">\(\text{ACTION}[I, \alpha] = S_{I^{\prime}}\)</span></p></li>
-<li><p>如果<span class="math inline">\(\text{GOTO}(I, A) = I^{\prime}\)</span>，则<span class="math inline">\(\text{GOTO}[I, A] = I^{\prime}\)</span></p></li>
-<li><p>如果<span class="math inline">\(I\)</span>中有归约项，则<span class="math inline">\(\forall \alpha, \text{ACTION}[I, \alpha] = r_{x}\)</span>，其中<span class="math inline">\(x\)</span>为归约项对应产生式的编号</p></li>
-</ol></li>
-</ol>
-]]></content>
-      <categories>
-        <category>note</category>
-      </categories>
-      <tags>
-        <tag>编译原理</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>try latex</title>
     <url>/2022/02/01/try-latex/</url>
     <content><![CDATA[<p><span class="math inline">\(a=\lambda x.x\)</span></p>
@@ -415,5 +415,18 @@ A = \begin{bmatrix}
       <tags>
         <tag>LaTeX</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>三月三十一日于西北食堂用午餐作诗一首</title>
+    <url>/2022/04/01/%E4%B8%89%E6%9C%88%E4%B8%89%E5%8D%81%E4%B8%80%E6%97%A5%E4%BA%8E%E8%A5%BF%E5%8C%97%E9%A3%9F%E5%A0%82%E7%94%A8%E5%8D%88%E9%A4%90%E4%BD%9C%E8%AF%97%E4%B8%80%E9%A6%96/</url>
+    <content><![CDATA[<p><img src="/img/0401-1.jpg" /></p>
+<blockquote>
+<p>三奎肉饭十六元，三两口就全吃完。<br />
+西北食堂物价高，以后换个小点盘。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>blog</category>
+      </categories>
   </entry>
 </search>

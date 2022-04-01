@@ -6,7 +6,7 @@
   <link href="http://miaohao-oops.github.io/atom.xml" rel="self"/>
   
   <link href="http://miaohao-oops.github.io/"/>
-  <updated>2022-03-29T07:30:30.314Z</updated>
+  <updated>2022-04-01T00:32:24.930Z</updated>
   <id>http://miaohao-oops.github.io/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>三月三十一日于西北食堂用午餐作诗一首</title>
+    <link href="http://miaohao-oops.github.io/2022/04/01/%E4%B8%89%E6%9C%88%E4%B8%89%E5%8D%81%E4%B8%80%E6%97%A5%E4%BA%8E%E8%A5%BF%E5%8C%97%E9%A3%9F%E5%A0%82%E7%94%A8%E5%8D%88%E9%A4%90%E4%BD%9C%E8%AF%97%E4%B8%80%E9%A6%96/"/>
+    <id>http://miaohao-oops.github.io/2022/04/01/%E4%B8%89%E6%9C%88%E4%B8%89%E5%8D%81%E4%B8%80%E6%97%A5%E4%BA%8E%E8%A5%BF%E5%8C%97%E9%A3%9F%E5%A0%82%E7%94%A8%E5%8D%88%E9%A4%90%E4%BD%9C%E8%AF%97%E4%B8%80%E9%A6%96/</id>
+    <published>2022-04-01T00:27:03.000Z</published>
+    <updated>2022-04-01T00:32:24.930Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="/img/0401-1.jpg" /></p><blockquote><p>三奎肉饭十六元，三两口就全吃完。<br />西北食堂物价高，以后换个小点盘。</p></blockquote>]]></content>
+    
+    
+    <summary type="html">最近校园食堂问题频发，无论是卫生还是菜品质量，抑或是价格。昨天中午在西北食堂点了一份16元的蜜汁三奎肉盖饭，结果做出来的量只有盘子的一半不到，遂作此打油诗。</summary>
+    
+    
+    
+    <category term="blog" scheme="http://miaohao-oops.github.io/categories/blog/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>LR(0)分析方法</title>
