@@ -6,7 +6,7 @@
   <link href="http://miaohao-oops.github.io/atom.xml" rel="self"/>
   
   <link href="http://miaohao-oops.github.io/"/>
-  <updated>2022-04-01T00:32:24.930Z</updated>
+  <updated>2022-05-02T07:53:18.926Z</updated>
   <id>http://miaohao-oops.github.io/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用 nginx 在服务器上反向代理 Tomcat</title>
+    <link href="http://miaohao-oops.github.io/2022/05/02/%E4%BD%BF%E7%94%A8nginx%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86Tomcat/"/>
+    <id>http://miaohao-oops.github.io/2022/05/02/%E4%BD%BF%E7%94%A8nginx%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86Tomcat/</id>
+    <published>2022-05-02T07:30:35.000Z</published>
+    <updated>2022-05-02T07:53:18.926Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="反向代理概述">反向代理概述</h2><p>在服务器上使用 nginx 软件并添加相关配置就可以实现反向代理。所谓反向代理，就是通过访问代理服务器（安装并配置了 nginx）的特定端口或域名，将访问请求转发到其他服务器或其他服务上。举例来说，我在服务器上运行了 Tomcat 软件，它打开的是 <code>localhost:8080</code>，现在我想通过服务器的 IP 地址从外网访问 Tomcat 服务（比如：<code>服务器IP:8082</code>），那么这时就可以使用 nginx 进行反向代理。在上面的例子里，nginx 的大致工作过程是：经过配置后，nginx 将开始监听服务器的 <code>8082</code> 端口，当服务器收到来自 <code>8082</code> 端口的访问请求时，nginx 将请求转发到 <code>localhost:8080</code>，返回数据也是同样的过程，相当于 nginx 在中间起到了仲裁的作用。</p><h2 id="配置过程">配置过程</h2><p>我的服务器上的 nginx 配置文件位于 <code>/usr/local/nginx/conf/nginx.conf</code> 中，在文件的 <code>http&#123; ... &#125;</code> 大括号中加入：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><pre><code class="hljs conf">server<br>&#123;<br>    listen 8082;<br>    server_name _;<br><br>    location / &#123;<br>        proxy_pass http://localhost:8080/;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure><p>然后重启 nginx （我这里使用的是 lnmp，也可以使用不同的方法重启 nginx）：</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">sudo lnmp nginx restart<br></code></pre></td></tr></table></figure><p>现在，在浏览器的地址栏输入 <code>服务器IP:8082</code>，就可以访问运行在服务器上的 Tomcat服务了。</p><h2 id="小插曲">小插曲</h2><p>实际上在配置完成后我并不能直接访问服务器的 <code>8082</code> 端口，这是因为我使用的阿里云服务器没有对外打开这个端口。需要进入阿里云控制台，在防火墙配置中将该端口打开才能正常访问。</p>]]></content>
+    
+    
+    <summary type="html">记录一下如何在一台服务器上配置 nginx 使得通过外网的某个接口访问 Tomcat 服务。</summary>
+    
+    
+    
+    <category term="blog" scheme="http://miaohao-oops.github.io/categories/blog/"/>
+    
+    
+    <category term="软件配置" scheme="http://miaohao-oops.github.io/tags/%E8%BD%AF%E4%BB%B6%E9%85%8D%E7%BD%AE/"/>
+    
+    <category term="计算机网络" scheme="http://miaohao-oops.github.io/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
   
   <entry>
     <title>三月三十一日于西北食堂用午餐作诗一首</title>
@@ -155,9 +178,9 @@
     <category term="NEMU" scheme="http://miaohao-oops.github.io/categories/NEMU/"/>
     
     
-    <category term="C语言" scheme="http://miaohao-oops.github.io/tags/C%E8%AF%AD%E8%A8%80/"/>
-    
     <category term="理论计算机科学" scheme="http://miaohao-oops.github.io/tags/%E7%90%86%E8%AE%BA%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    <category term="C语言" scheme="http://miaohao-oops.github.io/tags/C%E8%AF%AD%E8%A8%80/"/>
     
   </entry>
   
