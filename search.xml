@@ -277,6 +277,7 @@ A&amp;\rightarrow \alpha X \cdot &amp;(3)\\
       </categories>
       <tags>
         <tag>硬件描述语言</tag>
+        <tag>chisel</tag>
       </tags>
   </entry>
   <entry>
@@ -575,7 +576,7 @@ A = \begin{bmatrix}
 <p>实际上在配置完成后我并不能直接访问服务器的 <code>8082</code> 端口，这是因为我使用的阿里云服务器没有对外打开这个端口。需要进入阿里云控制台，在防火墙配置中将该端口打开才能正常访问。</p>
 ]]></content>
       <categories>
-        <category>blog</category>
+        <category>note</category>
       </categories>
       <tags>
         <tag>软件配置</tag>
