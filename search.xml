@@ -1,6 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>chisel 使用浅测</title>
+    <url>/2022/06/02/chisel%E4%BD%BF%E7%94%A8%E6%B5%85%E6%B5%8B/</url>
+    <content><![CDATA[<h2 id="什么是-chisel">什么是 chisel</h2>
+<p>关于“什么是 chisel”这个问题，在网上已经有了详尽的讨论：它是硬件描述语言，它是 scala 的包等等。在我的使用范畴下，我认为它是一个编译器，依托于 scala 包的形式存在，有些类似于 LLVM 以库的形式存在的特点。它具有编译器的特点：源语言是 scala，目标语言是 verilog，此外还具有中间表示 FIRRTL。chisel 的工作过程可以理解为：通过在 scala 代码中调用一些 chisel 包中的类和方法，再运行这段 scala 代码，产生可综合的 verilog。</p>
+<h2 id="chisel-的优势">chisel 的优势</h2>
+<p>chisel 的敏捷性源于它更高层次的抽象以及 scala 语言本身面向对象、函数式的特点。</p>
+<h3 id="丰富的数据类型">丰富的数据类型</h3>
+<p>下面是 <a href="https://www.chisel-lang.org/">chisel 官网</a> 中数据类型的继承关系图：</p>
+<p><img src="/img/chisel_type_hierarchy.svg" /></p>
+<p>比较常用的数据类型有 <code>UInt</code>，<code>SInt</code>，<code>Bool</code>，<code>Clock</code> 和 <code>Reset</code>。此外还可以通过 <code>Vec</code> 和 <code>Bundle</code> 将它们聚集起来，<code>Vec</code> 用于聚集相同的类型，而 <code>Bundle</code> 用于聚集不同的类型。</p>
+<h3 id="简单的硬件模型">简单的硬件模型</h3>
+<p>在 chisel 中的硬件模型只有两种：线网 <code>Wire</code> 和寄存器 <code>Reg</code>，并且使用了 <code>Reg</code> 声明的变量最终一定会产生寄存器，而不像 verilog 一样不能确定。</p>
+<p>声明一个硬件需要将数据类型和硬件模型结合起来使用：</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-keyword">val</span> foo = <span class="hljs-type">Wire</span>(<span class="hljs-type">UInt</span>(<span class="hljs-number">32.</span><span class="hljs-type">W</span>))<br><span class="hljs-keyword">val</span> bar = <span class="hljs-type">Reg</span>(<span class="hljs-type">Bool</span>())<br></code></pre></td></tr></table></figure>
+<p><code>foo</code> 描述了一个 32 位宽的线，<code>bar</code> 描述了一个 1 位宽的寄存器。需要注意的是，在 chisel 中的时钟和复位信号是隐含的，<code>Reg</code> 默认使用该寄存器所在模块的同步时钟和复位信号。</p>
+<h3 id="自定义类型">自定义类型</h3>
+<p>在编写 verilog 时，常常因为散乱的接口而难以维护，陷入“设计一小时，模块编码一小时，接线两小时”的窘境，chisel 的自定义类型解决了这一问题。</p>
+<h4 id="bundle-继承">Bundle 继承</h4>
+<p>通过继承 <code>Bundle</code> 类，用户可以自定义线束类型，将不同类型的线聚集起来：</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyBundle</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> src = <span class="hljs-type">Vec</span>(<span class="hljs-number">2</span>, <span class="hljs-type">UInt</span>(<span class="hljs-number">32.</span><span class="hljs-type">W</span>))<br>  <span class="hljs-keyword">val</span> op = <span class="hljs-type">Vec</span>(<span class="hljs-number">12</span>, <span class="hljs-type">Bool</span>())<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>定义了由两个 32 位操作数 <code>src</code> 和一个 12 位操作码 <code>op</code> 所组成的线束。在模块中，可以使用自定义类型产生硬件并对其进行连接：</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-keyword">val</span> myBundle = <span class="hljs-type">Wire</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyBundle</span>)<br>myBundle.src(<span class="hljs-number">0</span>) := <span class="hljs-number">0.</span><span class="hljs-type">U</span><br>myBundle.src(<span class="hljs-number">1</span>) := <span class="hljs-number">1.</span><span class="hljs-type">U</span><br>myBundle.op := <span class="hljs-string">&quot;b000100&quot;</span>.<span class="hljs-type">U</span><br></code></pre></td></tr></table></figure>
+<h4 id="module-继承">Module 继承</h4>
+<p>Module 是电路中基本组成单元，chisel 中的模块同样抽象为 IO 接口和内部逻辑，通过继承 Module 可以自定义模块：</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyModule</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>    <span class="hljs-keyword">val</span> in = <span class="hljs-type">Input</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyBundle</span>)<br>    <span class="hljs-keyword">val</span> out = <span class="hljs-type">Output</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>      <span class="hljs-keyword">val</span> res = <span class="hljs-type">UInt</span>(<span class="hljs-number">32.</span><span class="hljs-type">W</span>)<br>    &#125;)<br>  &#125;)<br><br>  io.out.res := <span class="hljs-type">Mux1H</span>(<span class="hljs-type">Seq</span>(<br>    io.in.op(<span class="hljs-number">0</span>) -&gt; io.in.src(<span class="hljs-number">0</span>) + io.in.src(<span class="hljs-number">1</span>),<br>    io.in.op(<span class="hljs-number">1</span>) -&gt; io.in.src(<span class="hljs-number">0</span>) - io.in.src(<span class="hljs-number">1</span>),<br>    ...<br>  ))<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>定义了一个使用 12 位独热码作为操作码的 alu 模块。其中值 <code>io</code> 定义了该模块的 IO 接口。为了创建它，定义了一个匿名的 Bundle 对象，其中包含 <code>in</code> 和 <code>out</code> 分别定义输入接口和输出接口。定义 IO 接口中的 3 个方法 <code>IO</code>，<code>Input</code> 和 <code>Output</code> 接受的参数都是 <code>Bundle</code> 的对象，因此在这里可以使用自定义的线束类型。<code>MyModule</code> 中剩余部分是该模块的内部逻辑，这里使用了原语 <code>Mux1H</code> 生成一个独热码选择器。</p>
+<h4 id="快速连接模块">快速连接模块</h4>
+<p>chisel 中基本的连接算符是 <code>:=</code> ，信号的流动方向是从右向左。chisel 中还提供了一种 element-wise 的连接算符 <code>&lt;&gt;</code>，它可以快速连接线束中的<strong>同名元素</strong>，并检查其类型是否相同：</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyModuleWrap</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>    <span class="hljs-keyword">val</span> in = <span class="hljs-type">Input</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyBundle</span>)<br>    <span class="hljs-keyword">val</span> out = <span class="hljs-type">Output</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>      <span class="hljs-keyword">val</span> res = <span class="hljs-type">UInt</span>(<span class="hljs-number">32.</span><span class="hljs-type">W</span>)<br>    &#125;)<br>  &#125;)<br>  <span class="hljs-keyword">val</span> myAlu = <span class="hljs-type">Module</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyModule</span>)<br><br>  myAlu.io&lt;&gt;io<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="强大的语法检查">强大的语法检查</h3>
+<p>正如上文所提到的，在 chisel 进行编译时，编译器将检查连接左右硬件的数据类型是否相同，若不同则报错，停止编译。实际上，chisel 编译器还做了更多的事情，能够帮助在编码时就检查出一些设计功能无关的错误，节省开发时间。</p>
+<h3 id="参数化模块">参数化模块</h3>
+<p>由于所有类型的定义都是基于 scala 的类，因此可以使用类的初始化参数对模块进行参数化定义：</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyBundle</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> src = <span class="hljs-type">Vec</span>(<span class="hljs-number">2</span>, <span class="hljs-type">UInt</span>(xLen.<span class="hljs-type">W</span>))<br>  <span class="hljs-keyword">val</span> op = <span class="hljs-type">Vec</span>(<span class="hljs-number">12</span>, <span class="hljs-type">Bool</span>())<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyModule</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>    <span class="hljs-keyword">val</span> in = <span class="hljs-type">Input</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyBundle</span>(xLen))<br>    <span class="hljs-keyword">val</span> out = <span class="hljs-type">Output</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>      <span class="hljs-keyword">val</span> res = <span class="hljs-type">UInt</span>(xLen.<span class="hljs-type">W</span>)<br>    &#125;)<br>  &#125;)<br><br>  io.out.res := <span class="hljs-type">Mux1H</span>(<span class="hljs-type">Seq</span>(<br>    io.in.op(<span class="hljs-number">0</span>) -&gt; io.in.src(<span class="hljs-number">0</span>) + io.in.src(<span class="hljs-number">1</span>),<br>    io.in.op(<span class="hljs-number">1</span>) -&gt; io.in.src(<span class="hljs-number">0</span>) - io.in.src(<span class="hljs-number">1</span>),<br>    ...<br>  ))<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>在实例化模块时，可以通过改变传入的参数定制不同的模块：</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-keyword">val</span> myModule1 = <span class="hljs-type">Module</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyModule</span>(<span class="hljs-number">16</span>))<br><span class="hljs-keyword">val</span> myModule2 = <span class="hljs-type">Module</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyModule</span>(<span class="hljs-number">32</span>))<br></code></pre></td></tr></table></figure>
+<h3 id="scala-集合类型和函数式编程">scala 集合类型和函数式编程</h3>
+<p>集合类型和函数式编程都是 scala 的语言特性，由于 chisel 是 scala 的包，因此可以使用这些特性用于构造硬件生成器。</p>
+<p>比如说对于设计 CPU 核而言，一个明显的集合是<strong>指令集</strong>，在 chisel 中，可以将所有指令放到一个查找表中，利用 scala 的 <code>ListLookUp</code> 方法生成译码逻辑：</p>
+<ol type="1">
+<li>首先，构造查找表，它使用一个指令作为索引，查找结果是控制信号：</li>
+</ol>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">DecodeConstants</span> </span>&#123;<br>  <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">CtrlIdx</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">scala</span>.<span class="hljs-title">Enumeration</span> </span>&#123;<br>    <span class="hljs-keyword">val</span> selSrc0, selSrc1, selImm, selWnum, fuType, fuOp, rfWen, illegal = <span class="hljs-type">Value</span><br>  &#125;<br><br>  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">default</span></span>: <span class="hljs-type">List</span>[<span class="hljs-type">UInt</span>] = <span class="hljs-comment">// no instruction</span><br>  <span class="hljs-comment">//     SelSrc(0)</span><br>  <span class="hljs-comment">//     |   SelSrc(1)</span><br>  <span class="hljs-comment">//     |   |   SelImm</span><br>  <span class="hljs-comment">//     |   |   |    SelWnum</span><br>  <span class="hljs-comment">//     |   |   |    |      FuType</span><br>  <span class="hljs-comment">//     |   |   |    |      |    FuOp</span><br>  <span class="hljs-comment">//     |   |   |    |      |    |    rfWen</span><br>  <span class="hljs-comment">//     |   |   |    |      |    |    |  illegal</span><br>    <span class="hljs-type">List</span>(rs, rt, nan, dzero, alu, sll, f, t)<br>  <span class="hljs-keyword">val</span> table: <span class="hljs-type">Array</span>[(<span class="hljs-type">BitPat</span>, <span class="hljs-type">List</span>[<span class="hljs-type">UInt</span>])]<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">MIPS32I</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">DecodeConstants</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> table: <span class="hljs-type">Array</span>[(<span class="hljs-type">BitPat</span>, <span class="hljs-type">List</span>[<span class="hljs-type">UInt</span>])] = <span class="hljs-type">Array</span>(<br>    <span class="hljs-type">SLL</span>   -&gt; rTypeRAlu(sll),<br>    <span class="hljs-type">SRL</span>   -&gt; rTypeRAlu(srl),<br>    <span class="hljs-type">SRA</span>   -&gt; rTypeRAlu(sra),<br><br>    <span class="hljs-type">JR</span>    -&gt; rTypeJr(jumpr),<br><br>    <span class="hljs-type">ADDU</span>  -&gt; rTypeRAlu(add),<br>    <span class="hljs-type">SUBU</span>  -&gt; rTypeRAlu(sub),<br><br>    <span class="hljs-type">AND</span>   -&gt; rTypeRAlu(and),<br>    <span class="hljs-type">OR</span>    -&gt; rTypeRAlu(or),<br>    <span class="hljs-type">XOR</span>   -&gt; rTypeRAlu(xor),<br>    <span class="hljs-type">NOR</span>   -&gt; rTypeRAlu(nor),<br>    <span class="hljs-type">SLT</span>   -&gt; rTypeRAlu(slt),<br>    <span class="hljs-type">SLTU</span>  -&gt; rTypeRAlu(sltu),<br><br>    <span class="hljs-type">JAL</span>   -&gt; jTypeJal(jump),<br><br>    <span class="hljs-type">BEQ</span>   -&gt; iTypeBr(beq),<br>    <span class="hljs-type">BNE</span>   -&gt; iTypeBr(bne),<br><br>    <span class="hljs-type">ADDIU</span> -&gt; iTypeUAlu(add),<br><br>    <span class="hljs-type">LUI</span>   -&gt; iTypeUAlu(lui),<br><br>    <span class="hljs-type">LW</span>    -&gt; iTypeLd(lw),<br><br>    <span class="hljs-type">SW</span>    -&gt; iTypeSt(sw)<br>  )<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><code>table</code> 定义了所需要的查找表，它的表项是一系列键-值对，键-值对在 scala 中使用 <code>-&gt;</code> 表示，左边是键，右边是值。在查找表中，所有键的类型都是 <code>BitPat</code>，它是 chisel 中的一种用于做二进制串模式匹配的类型；所有值的类型都是 <code>List[UInt]</code>，即由 <code>UInt</code> 对象组成的列表，用于表示某条指令对应的控制信号的具体取值。</p>
+<ol start="2" type="1">
+<li>定义控制信号的线束：</li>
+</ol>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ControlSignals</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> selSrc0 = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> selSrc1 = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> selImm = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> selWnum = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> fuType = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> fuOp = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> rfWen = <span class="hljs-type">Bool</span>()<br>  <span class="hljs-keyword">val</span> illegal = <span class="hljs-type">Bool</span>()<br><br>  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">signals</span> </span>= <span class="hljs-type">Array</span>(<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.selSrc0 -&gt; selSrc0,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.selSrc1 -&gt; selSrc1,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.selImm -&gt; selImm,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.selWnum -&gt; selWnum,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.fuType -&gt; fuType,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.fuOp -&gt; fuOp,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.rfWen -&gt; rfWen,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.illegal -&gt; illegal<br>  )<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>这里没有指定信号的位宽，在编译时 chisel 将自动推导出它们的宽度。另外，定义了 <code>signal</code> 方法，它返回一个 <code>Array</code>，存储这些信号在查找结果中的索引和具体信号值的键-值对，方便在模块中对其进行迭代。</p>
+<ol start="3" type="1">
+<li>定义译码模块：</li>
+</ol>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Instruction</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> instr = <span class="hljs-type">UInt</span>(xLen.<span class="hljs-type">W</span>)<br>  <span class="hljs-keyword">val</span> pc = <span class="hljs-type">UInt</span>(xLen.<span class="hljs-type">W</span>)<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ControlIO</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> in = <span class="hljs-type">Input</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Instruction</span>(xLen))<br>  <span class="hljs-keyword">val</span> out = <span class="hljs-type">Output</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">ControlSignals</span>(xLen))<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Control</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">ControlIO</span>(xLen))<br><br>  <span class="hljs-keyword">val</span> ctrlSignals = <span class="hljs-type">ListLookup</span>(io.in.instr, <span class="hljs-type">MIPS32I</span>.<span class="hljs-keyword">default</span>, <span class="hljs-type">MIPS32I</span>.table)<br>  io.out.signals.map(x =&gt; x._2 := ctrlSignals(x._1.id))<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>译码模块 <code>Control</code> 的输入是一条指令及其对应的 <code>pc</code>，输出是控制信号。该模块的巧妙之处在于控制信号的生成。</p>
+<p>首先，使用 <code>ListLookup</code> 方法对之前构建的查找表进行查找，查找的结果是一个 <code>UInt</code> 组成的 <code>List</code>，将其存储在 <code>ctrlSignals</code> 中。</p>
+<p>然后调用 <code>Array</code>（<code>io.out.signals</code> 方法返回一个 <code>Array</code>）的 <code>map</code> 方法进行迭代。该方法传入了一个匿名函数 <code>x =&gt; x._2 := ctrlSignals(x._1.id)</code>，它将 <code>Array</code>中的每一项取出，使用该项的键索引查找结果，然后将其连接到对应的值上。最终的效果是将查找结果的每一项都连接到了对应的控制信号上。</p>
+<h3 id="scala-泛型">scala 泛型</h3>
+<p>由于 scala 泛型的存在，可以对电路进行更高层次的抽象。</p>
+<p>比如说对于流水线寄存器而言，可以将其抽象为：</p>
+<ol type="1">
+<li>IO 接口：</li>
+</ol>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">名称</th>
+<th style="text-align: center;">方向</th>
+<th style="text-align: center;">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">io.in.data.valid</td>
+<td style="text-align: center;">input</td>
+<td style="text-align: center;">输入数据有效</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">io.in.data.bits</td>
+<td style="text-align: center;">input</td>
+<td style="text-align: center;">输入数据</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">io.in.stall</td>
+<td style="text-align: center;">input</td>
+<td style="text-align: center;">流水级暂停</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">io.in.flush</td>
+<td style="text-align: center;">input</td>
+<td style="text-align: center;">流水级冲刷</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">io.out.data.valid</td>
+<td style="text-align: center;">output</td>
+<td style="text-align: center;">输出数据有效</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">io.out.data.bits</td>
+<td style="text-align: center;">outptu</td>
+<td style="text-align: center;">输出数据</td>
+</tr>
+</tbody>
+</table>
+<ol start="2" type="1">
+<li>内部逻辑（伪代码）：</li>
+</ol>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StageReg</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">StageRegIO</span>)<br><br>  <span class="hljs-keyword">val</span> validReg = <span class="hljs-type">Reg</span>(<span class="hljs-type">Bool</span>())<br>  <span class="hljs-keyword">val</span> dataReg = <span class="hljs-type">Reg</span>(<span class="hljs-type">DataType</span>())<br><br>  when(reset.asBool || io.in.flush) &#123;<br>    validReg := <span class="hljs-number">0.</span><span class="hljs-type">U</span><br>  &#125; .elsewhen(!io.in.stall) &#123;<br>    validReg := io.in.data.valid<br>  &#125;<br><br>  when (!io.in.stall) &#123;<br>    dataReg := io.in.data.bits<br>  &#125;<br><br>  io.out.data.valid := validReg<br>  io.out.data.bits := dataReg<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>在实际使用中，IO 接口和内部逻辑都是不变的，发生变化的是输入数据的类型 <code>DataType</code>，因此可以对于输入的数据类型使用泛型：</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StageRegIn</span>[<span class="hljs-type">T</span>&lt;:<span class="hljs-type">Bundle</span>](<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32, dataType: <span class="hljs-type">T</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> stall = <span class="hljs-type">Input</span>(<span class="hljs-type">Bool</span>())<br>  <span class="hljs-keyword">val</span> flush = <span class="hljs-type">Input</span>(<span class="hljs-type">Bool</span>())<br>  <span class="hljs-keyword">val</span> data = <span class="hljs-type">Flipped</span>(<span class="hljs-type">Valid</span>(dataType))<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StageRegOut</span>[<span class="hljs-type">T</span>&lt;:<span class="hljs-type">Bundle</span>](<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32, dataType: <span class="hljs-type">T</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> data = <span class="hljs-type">Valid</span>(dataType)<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StageRegIO</span>[<span class="hljs-type">T</span>&lt;:<span class="hljs-type">Bundle</span>](<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32, dataType: <span class="hljs-type">T</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> in = <span class="hljs-keyword">new</span> <span class="hljs-type">StageRegIn</span>(xLen, dataType)<br>  <span class="hljs-keyword">val</span> out = <span class="hljs-keyword">new</span> <span class="hljs-type">StageRegOut</span>(xLen, dataType)<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StageReg</span>[<span class="hljs-type">T</span>&lt;:<span class="hljs-type">Bundle</span>](<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32, dataType: <span class="hljs-type">T</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">StageRegIO</span>(xLen, dataType))<br><br>  <span class="hljs-keyword">val</span> validReg = <span class="hljs-type">Reg</span>(<span class="hljs-type">Bool</span>())<br>  <span class="hljs-keyword">val</span> dataReg = <span class="hljs-type">Reg</span>(dataType)<br><br>  when(reset.asBool || io.in.flush) &#123;<br>    validReg := <span class="hljs-number">0.</span><span class="hljs-type">U</span><br>  &#125; .elsewhen(!io.in.stall) &#123;<br>    validReg := io.in.data.valid<br>  &#125;<br><br>  when (!io.in.stall) &#123;<br>    dataReg := io.in.data.bits<br>  &#125;<br><br>  io.out.data.valid := validReg<br>  io.out.data.bits := dataReg<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>在实例化一个流水级寄存器时，可以传入自定义类型以定制寄存器的输入输出数据类型：</p>
+<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-keyword">val</span> myStageReg = <span class="hljs-type">Module</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">StageReg</span>(<span class="hljs-number">32</span>, <span class="hljs-keyword">new</span> <span class="hljs-type">MyBundle</span>))<br></code></pre></td></tr></table></figure>
+<h2 id="chisel-的劣势">chisel 的劣势</h2>
+<h3 id="学习成本高">学习成本高</h3>
+<p>chisel 是基于 scala 开发的包，因此使用 chisel 需要先学习 scala。相比于 C 而言，scala 是一门完全不同的语言，其中面向对象、函数式编程的特性是 C 所不具备的，需要从头学习。之所以需要学习这些高级特性，是因为只有使用了这些特性才能充分利用 chisel 的优势，否则 chisel 的使用体验和 verilog 差不多。</p>
+<h3 id="对工业级开发流程支持尚不完善">对工业级开发流程支持尚不完善</h3>
+<p>目前，我只把 chisel 当作一个工具，用于使用更少、更易于维护的代码生成 verilog，然后将 verilog 导入 vivado 工程，作为 SOC 的一部分进行仿真、综合、实现、比特流生成和上板。虽然 chisel 中包含测试模块，但是它完全不支持对于 IP 核的调用。</p>
+<h2 id="参考资料">参考资料</h2>
+<ul>
+<li><p><a href="https://www.chisel-lang.org/chisel3/docs/introduction.html">chisel 官方文档</a>：包含了一些 chisel 的基本使用方法</p></li>
+<li><p><a href="https://www.chisel-lang.org/api/latest/index.html">chisel API 文档</a>：包含所有 chisel API 的原型和使用方法</p></li>
+<li><p><a href="https://github.com/freechipsproject/chisel-bootcamp">chisel bootcamp</a>：一个 chisel/scala 从零入门教程</p></li>
+</ul>
+]]></content>
+      <categories>
+        <category>note</category>
+      </categories>
+      <tags>
+        <tag>硬件描述语言</tag>
+        <tag>chisel</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>LR(0)分析方法</title>
     <url>/2022/03/29/LR-0-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95/</url>
     <content><![CDATA[<h2 id="基本概念">基本概念</h2>
@@ -149,197 +281,6 @@ A&amp;\rightarrow \alpha X \cdot &amp;(3)\\
 ]]></content>
   </entry>
   <entry>
-    <title>chisel 使用浅测</title>
-    <url>/2022/06/02/chisel%E4%BD%BF%E7%94%A8%E6%B5%85%E6%B5%8B/</url>
-    <content><![CDATA[<h2 id="什么是-chisel">什么是 chisel</h2>
-<p>关于“什么是 chisel”这个问题，在网上已经有了详尽的讨论：它是硬件描述语言，它是 scala 的包等等。在我的使用范畴下，我认为它是一个编译器，依托于 scala 包的形式存在，有些类似于 LLVM 以库的形式存在的特点。它具有编译器的特点：源语言是 scala，目标语言是 verilog，此外还具有中间表示 FIRRTL。chisel 的工作过程可以理解为：通过在 scala 代码中调用一些 chisel 包中的类和方法，再运行这段 scala 代码，产生可综合的 verilog。</p>
-<h2 id="chisel-的优势">chisel 的优势</h2>
-<p>chisel 的敏捷性源于它更高层次的抽象以及 scala 语言本身面向对象、函数式的特点。</p>
-<h3 id="丰富的数据类型">丰富的数据类型</h3>
-<p>下面是 <a href="https://www.chisel-lang.org/">chisel 官网</a> 中数据类型的继承关系图：</p>
-<p><img src="/img/chisel_type_hierarchy.svg" /></p>
-<p>比较常用的数据类型有 <code>UInt</code>，<code>SInt</code>，<code>Bool</code>，<code>Clock</code> 和 <code>Reset</code>。此外还可以通过 <code>Vec</code> 和 <code>Bundle</code> 将它们聚集起来，<code>Vec</code> 用于聚集相同的类型，而 <code>Bundle</code> 用于聚集不同的类型。</p>
-<h3 id="简单的硬件模型">简单的硬件模型</h3>
-<p>在 chisel 中的硬件模型只有两种：线网 <code>Wire</code> 和寄存器 <code>Reg</code>，并且使用了 <code>Reg</code> 声明的变量最终一定会产生寄存器，而不像 verilog 一样不能确定。</p>
-<p>声明一个硬件需要将数据类型和硬件模型结合起来使用：</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-keyword">val</span> foo = <span class="hljs-type">Wire</span>(<span class="hljs-type">UInt</span>(<span class="hljs-number">32.</span><span class="hljs-type">W</span>))<br><span class="hljs-keyword">val</span> bar = <span class="hljs-type">Reg</span>(<span class="hljs-type">Bool</span>())<br></code></pre></td></tr></table></figure>
-<p><code>foo</code> 描述了一个 32 位宽的线，<code>bar</code> 描述了一个 1 位宽的寄存器。需要注意的是，在 chisel 中的时钟和复位信号是隐含的，<code>Reg</code> 默认使用该寄存器所在模块的同步时钟和复位信号。</p>
-<h3 id="自定义类型">自定义类型</h3>
-<p>在编写 verilog 时，常常因为散乱的接口而难以维护，陷入“设计一小时，模块编码一小时，接线两小时”的窘境，chisel 的自定义类型解决了这一问题。</p>
-<h4 id="bundle-继承">Bundle 继承</h4>
-<p>通过继承 <code>Bundle</code> 类，用户可以自定义线束类型，将不同类型的线聚集起来：</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyBundle</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> src = <span class="hljs-type">Vec</span>(<span class="hljs-number">2</span>, <span class="hljs-type">UInt</span>(<span class="hljs-number">32.</span><span class="hljs-type">W</span>))<br>  <span class="hljs-keyword">val</span> op = <span class="hljs-type">Vec</span>(<span class="hljs-number">12</span>, <span class="hljs-type">Bool</span>())<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>定义了由两个 32 位操作数 <code>src</code> 和一个 12 位操作码 <code>op</code> 所组成的线束。在模块中，可以使用自定义类型产生硬件并对其进行连接：</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-keyword">val</span> myBundle = <span class="hljs-type">Wire</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyBundle</span>)<br>myBundle.src(<span class="hljs-number">0</span>) := <span class="hljs-number">0.</span><span class="hljs-type">U</span><br>myBundle.src(<span class="hljs-number">1</span>) := <span class="hljs-number">1.</span><span class="hljs-type">U</span><br>myBundle.op := <span class="hljs-string">&quot;b000100&quot;</span>.<span class="hljs-type">U</span><br></code></pre></td></tr></table></figure>
-<h4 id="module-继承">Module 继承</h4>
-<p>Module 是电路中基本组成单元，chisel 中的模块同样抽象为 IO 接口和内部逻辑，通过继承 Module 可以自定义模块：</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyModule</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>    <span class="hljs-keyword">val</span> in = <span class="hljs-type">Input</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyBundle</span>)<br>    <span class="hljs-keyword">val</span> out = <span class="hljs-type">Output</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>      <span class="hljs-keyword">val</span> res = <span class="hljs-type">UInt</span>(<span class="hljs-number">32.</span><span class="hljs-type">W</span>)<br>    &#125;)<br>  &#125;)<br><br>  io.out.res := <span class="hljs-type">Mux1H</span>(<span class="hljs-type">Seq</span>(<br>    io.in.op(<span class="hljs-number">0</span>) -&gt; io.in.src(<span class="hljs-number">0</span>) + io.in.src(<span class="hljs-number">1</span>),<br>    io.in.op(<span class="hljs-number">1</span>) -&gt; io.in.src(<span class="hljs-number">0</span>) - io.in.src(<span class="hljs-number">1</span>),<br>    ...<br>  ))<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>定义了一个使用 12 位独热码作为操作码的 alu 模块。其中值 <code>io</code> 定义了该模块的 IO 接口。为了创建它，定义了一个匿名的 Bundle 对象，其中包含 <code>in</code> 和 <code>out</code> 分别定义输入接口和输出接口。定义 IO 接口中的 3 个方法 <code>IO</code>，<code>Input</code> 和 <code>Output</code> 接受的参数都是 <code>Bundle</code> 的对象，因此在这里可以使用自定义的线束类型。<code>MyModule</code> 中剩余部分是该模块的内部逻辑，这里使用了原语 <code>Mux1H</code> 生成一个独热码选择器。</p>
-<h4 id="快速连接模块">快速连接模块</h4>
-<p>chisel 中基本的连接算符是 <code>:=</code> ，信号的流动方向是从右向左。chisel 中还提供了一种 element-wise 的连接算符 <code>&lt;&gt;</code>，它可以快速连接线束中的<strong>同名元素</strong>，并检查其类型是否相同：</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyModuleWrap</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>    <span class="hljs-keyword">val</span> in = <span class="hljs-type">Input</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyBundle</span>)<br>    <span class="hljs-keyword">val</span> out = <span class="hljs-type">Output</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>      <span class="hljs-keyword">val</span> res = <span class="hljs-type">UInt</span>(<span class="hljs-number">32.</span><span class="hljs-type">W</span>)<br>    &#125;)<br>  &#125;)<br>  <span class="hljs-keyword">val</span> myAlu = <span class="hljs-type">Module</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyModule</span>)<br><br>  myAlu.io&lt;&gt;io<br>&#125;<br></code></pre></td></tr></table></figure>
-<h3 id="强大的语法检查">强大的语法检查</h3>
-<p>正如上文所提到的，在 chisel 进行编译时，编译器将检查连接左右硬件的数据类型是否相同，若不同则报错，停止编译。实际上，chisel 编译器还做了更多的事情，能够帮助在编码时就检查出一些设计功能无关的错误，节省开发时间。</p>
-<h3 id="参数化模块">参数化模块</h3>
-<p>由于所有类型的定义都是基于 scala 的类，因此可以使用类的初始化参数对模块进行参数化定义：</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyBundle</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> src = <span class="hljs-type">Vec</span>(<span class="hljs-number">2</span>, <span class="hljs-type">UInt</span>(xLen.<span class="hljs-type">W</span>))<br>  <span class="hljs-keyword">val</span> op = <span class="hljs-type">Vec</span>(<span class="hljs-number">12</span>, <span class="hljs-type">Bool</span>())<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyModule</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>    <span class="hljs-keyword">val</span> in = <span class="hljs-type">Input</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyBundle</span>(xLen))<br>    <span class="hljs-keyword">val</span> out = <span class="hljs-type">Output</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Bundle</span>()&#123;<br>      <span class="hljs-keyword">val</span> res = <span class="hljs-type">UInt</span>(xLen.<span class="hljs-type">W</span>)<br>    &#125;)<br>  &#125;)<br><br>  io.out.res := <span class="hljs-type">Mux1H</span>(<span class="hljs-type">Seq</span>(<br>    io.in.op(<span class="hljs-number">0</span>) -&gt; io.in.src(<span class="hljs-number">0</span>) + io.in.src(<span class="hljs-number">1</span>),<br>    io.in.op(<span class="hljs-number">1</span>) -&gt; io.in.src(<span class="hljs-number">0</span>) - io.in.src(<span class="hljs-number">1</span>),<br>    ...<br>  ))<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>在实例化模块时，可以通过改变传入的参数定制不同的模块：</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-keyword">val</span> myModule1 = <span class="hljs-type">Module</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyModule</span>(<span class="hljs-number">16</span>))<br><span class="hljs-keyword">val</span> myModule2 = <span class="hljs-type">Module</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">MyModule</span>(<span class="hljs-number">32</span>))<br></code></pre></td></tr></table></figure>
-<h3 id="scala-集合类型和函数式编程">scala 集合类型和函数式编程</h3>
-<p>集合类型和函数式编程都是 scala 的语言特性，由于 chisel 是 scala 的包，因此可以使用这些特性用于构造硬件生成器。</p>
-<p>比如说对于设计 CPU 核而言，一个明显的集合是<strong>指令集</strong>，在 chisel 中，可以将所有指令放到一个查找表中，利用 scala 的 <code>ListLookUp</code> 方法生成译码逻辑：</p>
-<ol type="1">
-<li>首先，构造查找表，它使用一个指令作为索引，查找结果是控制信号：</li>
-</ol>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">DecodeConstants</span> </span>&#123;<br>  <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">CtrlIdx</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">scala</span>.<span class="hljs-title">Enumeration</span> </span>&#123;<br>    <span class="hljs-keyword">val</span> selSrc0, selSrc1, selImm, selWnum, fuType, fuOp, rfWen, illegal = <span class="hljs-type">Value</span><br>  &#125;<br><br>  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">default</span></span>: <span class="hljs-type">List</span>[<span class="hljs-type">UInt</span>] = <span class="hljs-comment">// no instruction</span><br>  <span class="hljs-comment">//     SelSrc(0)</span><br>  <span class="hljs-comment">//     |   SelSrc(1)</span><br>  <span class="hljs-comment">//     |   |   SelImm</span><br>  <span class="hljs-comment">//     |   |   |    SelWnum</span><br>  <span class="hljs-comment">//     |   |   |    |      FuType</span><br>  <span class="hljs-comment">//     |   |   |    |      |    FuOp</span><br>  <span class="hljs-comment">//     |   |   |    |      |    |    rfWen</span><br>  <span class="hljs-comment">//     |   |   |    |      |    |    |  illegal</span><br>    <span class="hljs-type">List</span>(rs, rt, nan, dzero, alu, sll, f, t)<br>  <span class="hljs-keyword">val</span> table: <span class="hljs-type">Array</span>[(<span class="hljs-type">BitPat</span>, <span class="hljs-type">List</span>[<span class="hljs-type">UInt</span>])]<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">MIPS32I</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">DecodeConstants</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> table: <span class="hljs-type">Array</span>[(<span class="hljs-type">BitPat</span>, <span class="hljs-type">List</span>[<span class="hljs-type">UInt</span>])] = <span class="hljs-type">Array</span>(<br>    <span class="hljs-type">SLL</span>   -&gt; rTypeRAlu(sll),<br>    <span class="hljs-type">SRL</span>   -&gt; rTypeRAlu(srl),<br>    <span class="hljs-type">SRA</span>   -&gt; rTypeRAlu(sra),<br><br>    <span class="hljs-type">JR</span>    -&gt; rTypeJr(jumpr),<br><br>    <span class="hljs-type">ADDU</span>  -&gt; rTypeRAlu(add),<br>    <span class="hljs-type">SUBU</span>  -&gt; rTypeRAlu(sub),<br><br>    <span class="hljs-type">AND</span>   -&gt; rTypeRAlu(and),<br>    <span class="hljs-type">OR</span>    -&gt; rTypeRAlu(or),<br>    <span class="hljs-type">XOR</span>   -&gt; rTypeRAlu(xor),<br>    <span class="hljs-type">NOR</span>   -&gt; rTypeRAlu(nor),<br>    <span class="hljs-type">SLT</span>   -&gt; rTypeRAlu(slt),<br>    <span class="hljs-type">SLTU</span>  -&gt; rTypeRAlu(sltu),<br><br>    <span class="hljs-type">JAL</span>   -&gt; jTypeJal(jump),<br><br>    <span class="hljs-type">BEQ</span>   -&gt; iTypeBr(beq),<br>    <span class="hljs-type">BNE</span>   -&gt; iTypeBr(bne),<br><br>    <span class="hljs-type">ADDIU</span> -&gt; iTypeUAlu(add),<br><br>    <span class="hljs-type">LUI</span>   -&gt; iTypeUAlu(lui),<br><br>    <span class="hljs-type">LW</span>    -&gt; iTypeLd(lw),<br><br>    <span class="hljs-type">SW</span>    -&gt; iTypeSt(sw)<br>  )<br>&#125;<br></code></pre></td></tr></table></figure>
-<p><code>table</code> 定义了所需要的查找表，它的表项是一系列键-值对，键-值对在 scala 中使用 <code>-&gt;</code> 表示，左边是键，右边是值。在查找表中，所有键的类型都是 <code>BitPat</code>，它是 chisel 中的一种用于做二进制串模式匹配的类型；所有值的类型都是 <code>List[UInt]</code>，即由 <code>UInt</code> 对象组成的列表，用于表示某条指令对应的控制信号的具体取值。</p>
-<ol start="2" type="1">
-<li>定义控制信号的线束：</li>
-</ol>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ControlSignals</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> selSrc0 = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> selSrc1 = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> selImm = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> selWnum = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> fuType = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> fuOp = <span class="hljs-type">UInt</span>()<br>  <span class="hljs-keyword">val</span> rfWen = <span class="hljs-type">Bool</span>()<br>  <span class="hljs-keyword">val</span> illegal = <span class="hljs-type">Bool</span>()<br><br>  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">signals</span> </span>= <span class="hljs-type">Array</span>(<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.selSrc0 -&gt; selSrc0,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.selSrc1 -&gt; selSrc1,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.selImm -&gt; selImm,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.selWnum -&gt; selWnum,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.fuType -&gt; fuType,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.fuOp -&gt; fuOp,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.rfWen -&gt; rfWen,<br>    <span class="hljs-type">MIPS32I</span>.<span class="hljs-type">CtrlIdx</span>.illegal -&gt; illegal<br>  )<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>这里没有指定信号的位宽，在编译时 chisel 将自动推导出它们的宽度。另外，定义了 <code>signal</code> 方法，它返回一个 <code>Array</code>，存储这些信号在查找结果中的索引和具体信号值的键-值对，方便在模块中对其进行迭代。</p>
-<ol start="3" type="1">
-<li>定义译码模块：</li>
-</ol>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Instruction</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> instr = <span class="hljs-type">UInt</span>(xLen.<span class="hljs-type">W</span>)<br>  <span class="hljs-keyword">val</span> pc = <span class="hljs-type">UInt</span>(xLen.<span class="hljs-type">W</span>)<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ControlIO</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> in = <span class="hljs-type">Input</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">Instruction</span>(xLen))<br>  <span class="hljs-keyword">val</span> out = <span class="hljs-type">Output</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">ControlSignals</span>(xLen))<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Control</span>(<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">ControlIO</span>(xLen))<br><br>  <span class="hljs-keyword">val</span> ctrlSignals = <span class="hljs-type">ListLookup</span>(io.in.instr, <span class="hljs-type">MIPS32I</span>.<span class="hljs-keyword">default</span>, <span class="hljs-type">MIPS32I</span>.table)<br>  io.out.signals.map(x =&gt; x._2 := ctrlSignals(x._1.id))<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>译码模块 <code>Control</code> 的输入是一条指令及其对应的 <code>pc</code>，输出是控制信号。该模块的巧妙之处在于控制信号的生成。</p>
-<p>首先，使用 <code>ListLookup</code> 方法对之前构建的查找表进行查找，查找的结果是一个 <code>UInt</code> 组成的 <code>List</code>，将其存储在 <code>ctrlSignals</code> 中。</p>
-<p>然后调用 <code>Array</code>（<code>io.out.signals</code> 方法返回一个 <code>Array</code>）的 <code>map</code> 方法进行迭代。该方法传入了一个匿名函数 <code>x =&gt; x._2 := ctrlSignals(x._1.id)</code>，它将 <code>Array</code>中的每一项取出，使用该项的键索引查找结果，然后将其连接到对应的值上。最终的效果是将查找结果的每一项都连接到了对应的控制信号上。</p>
-<h3 id="scala-泛型">scala 泛型</h3>
-<p>由于 scala 泛型的存在，可以对电路进行更高层次的抽象。</p>
-<p>比如说对于流水线寄存器而言，可以将其抽象为：</p>
-<ol type="1">
-<li>IO 接口：</li>
-</ol>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: center;">名称</th>
-<th style="text-align: center;">方向</th>
-<th style="text-align: center;">说明</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">io.in.data.valid</td>
-<td style="text-align: center;">input</td>
-<td style="text-align: center;">输入数据有效</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">io.in.data.bits</td>
-<td style="text-align: center;">input</td>
-<td style="text-align: center;">输入数据</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">io.in.stall</td>
-<td style="text-align: center;">input</td>
-<td style="text-align: center;">流水级暂停</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">io.in.flush</td>
-<td style="text-align: center;">input</td>
-<td style="text-align: center;">流水级冲刷</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">io.out.data.valid</td>
-<td style="text-align: center;">output</td>
-<td style="text-align: center;">输出数据有效</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">io.out.data.bits</td>
-<td style="text-align: center;">outptu</td>
-<td style="text-align: center;">输出数据</td>
-</tr>
-</tbody>
-</table>
-<ol start="2" type="1">
-<li>内部逻辑（伪代码）：</li>
-</ol>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StageReg</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">StageRegIO</span>)<br><br>  <span class="hljs-keyword">val</span> validReg = <span class="hljs-type">Reg</span>(<span class="hljs-type">Bool</span>())<br>  <span class="hljs-keyword">val</span> dataReg = <span class="hljs-type">Reg</span>(<span class="hljs-type">DataType</span>())<br><br>  when(reset.asBool || io.in.flush) &#123;<br>    validReg := <span class="hljs-number">0.</span><span class="hljs-type">U</span><br>  &#125; .elsewhen(!io.in.stall) &#123;<br>    validReg := io.in.data.valid<br>  &#125;<br><br>  when (!io.in.stall) &#123;<br>    dataReg := io.in.data.bits<br>  &#125;<br><br>  io.out.data.valid := validReg<br>  io.out.data.bits := dataReg<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>在实际使用中，IO 接口和内部逻辑都是不变的，发生变化的是输入数据的类型 <code>DataType</code>，因此可以对于输入的数据类型使用泛型：</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StageRegIn</span>[<span class="hljs-type">T</span>&lt;:<span class="hljs-type">Bundle</span>](<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32, dataType: <span class="hljs-type">T</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> stall = <span class="hljs-type">Input</span>(<span class="hljs-type">Bool</span>())<br>  <span class="hljs-keyword">val</span> flush = <span class="hljs-type">Input</span>(<span class="hljs-type">Bool</span>())<br>  <span class="hljs-keyword">val</span> data = <span class="hljs-type">Flipped</span>(<span class="hljs-type">Valid</span>(dataType))<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StageRegOut</span>[<span class="hljs-type">T</span>&lt;:<span class="hljs-type">Bundle</span>](<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32, dataType: <span class="hljs-type">T</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> data = <span class="hljs-type">Valid</span>(dataType)<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StageRegIO</span>[<span class="hljs-type">T</span>&lt;:<span class="hljs-type">Bundle</span>](<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32, dataType: <span class="hljs-type">T</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> in = <span class="hljs-keyword">new</span> <span class="hljs-type">StageRegIn</span>(xLen, dataType)<br>  <span class="hljs-keyword">val</span> out = <span class="hljs-keyword">new</span> <span class="hljs-type">StageRegOut</span>(xLen, dataType)<br>&#125;<br><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StageReg</span>[<span class="hljs-type">T</span>&lt;:<span class="hljs-type">Bundle</span>](<span class="hljs-params">xLen:<span class="hljs-type">Int</span> = 32, dataType: <span class="hljs-type">T</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>&#123;<br>  <span class="hljs-keyword">val</span> io = <span class="hljs-type">IO</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">StageRegIO</span>(xLen, dataType))<br><br>  <span class="hljs-keyword">val</span> validReg = <span class="hljs-type">Reg</span>(<span class="hljs-type">Bool</span>())<br>  <span class="hljs-keyword">val</span> dataReg = <span class="hljs-type">Reg</span>(dataType)<br><br>  when(reset.asBool || io.in.flush) &#123;<br>    validReg := <span class="hljs-number">0.</span><span class="hljs-type">U</span><br>  &#125; .elsewhen(!io.in.stall) &#123;<br>    validReg := io.in.data.valid<br>  &#125;<br><br>  when (!io.in.stall) &#123;<br>    dataReg := io.in.data.bits<br>  &#125;<br><br>  io.out.data.valid := validReg<br>  io.out.data.bits := dataReg<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>在实例化一个流水级寄存器时，可以传入自定义类型以定制寄存器的输入输出数据类型：</p>
-<figure class="highlight scala"><table><tr><td class="code"><pre><code class="hljs scala"><span class="hljs-keyword">val</span> myStageReg = <span class="hljs-type">Module</span>(<span class="hljs-keyword">new</span> <span class="hljs-type">StageReg</span>(<span class="hljs-number">32</span>, <span class="hljs-keyword">new</span> <span class="hljs-type">MyBundle</span>))<br></code></pre></td></tr></table></figure>
-<h2 id="chisel-的劣势">chisel 的劣势</h2>
-<h3 id="学习成本高">学习成本高</h3>
-<p>chisel 是基于 scala 开发的包，因此使用 chisel 需要先学习 scala。相比于 C 而言，scala 是一门完全不同的语言，其中面向对象、函数式编程的特性是 C 所不具备的，需要从头学习。之所以需要学习这些高级特性，是因为只有使用了这些特性才能充分利用 chisel 的优势，否则 chisel 的使用体验和 verilog 差不多。</p>
-<h3 id="对工业级开发流程支持尚不完善">对工业级开发流程支持尚不完善</h3>
-<p>目前，我只把 chisel 当作一个工具，用于使用更少、更易于维护的代码生成 verilog，然后将 verilog 导入 vivado 工程，作为 SOC 的一部分进行仿真、综合、实现、比特流生成和上板。虽然 chisel 中包含测试模块，但是它完全不支持对于 IP 核的调用。</p>
-<h2 id="参考资料">参考资料</h2>
-<ul>
-<li><p><a href="https://www.chisel-lang.org/chisel3/docs/introduction.html">chisel 官方文档</a>：包含了一些 chisel 的基本使用方法</p></li>
-<li><p><a href="https://www.chisel-lang.org/api/latest/index.html">chisel API 文档</a>：包含所有 chisel API 的原型和使用方法</p></li>
-<li><p><a href="https://github.com/freechipsproject/chisel-bootcamp">chisel bootcamp</a>：一个 chisel/scala 从零入门教程</p></li>
-</ul>
-]]></content>
-      <categories>
-        <category>note</category>
-      </categories>
-      <tags>
-        <tag>硬件描述语言</tag>
-        <tag>chisel</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hello World</title>
-    <url>/1970/01/01/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="quick-start">Quick Start</h2>
-<h3 id="create-a-new-post">Create a new post</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo new <span class="hljs-string">&quot;My New Post&quot;</span><br></code></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="run-server">Run server</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo server<br></code></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="generate-static-files">Generate static files</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo generate<br></code></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="deploy-to-remote-sites">Deploy to remote sites</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo deploy<br></code></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-]]></content>
-  </entry>
-  <entry>
-    <title>nju-pa摸鱼记1-宏的妙用</title>
-    <url>/2022/01/31/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B01-%E5%AE%8F%E7%9A%84%E5%A6%99%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="一前言">一、前言</h2>
-<p>上学期在课内学习了《计算机体系结构》，一直对最后一章老师讲到的硬件模拟器念念不忘，好奇它的工作原理。好巧不巧，某日在我刷github的时候南京大学的<a href="https://github.com/NJU-ProjectN/ics-pa">ics-pa项目</a>出现在了我的首页推荐中，于是我便打算利用寒假的时间过一下这个项目，并通过<a href="https://www.bilibili.com/read/cv15072569">B站的专栏</a>（现在同步到我的个人博客上）记录一些新的知识或者是心得体会。</p>
-<h2 id="二使用宏配置编译选项">二、使用宏配置编译选项</h2>
-<p>在项目代码进行编译前，需要先使用</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">make menuconfig<br></code></pre></td></tr></table></figure>
-<p>对项目进行配置，在勾选了一些选项退出后，<code>menuconfig</code>会根据之前的选项生成一些宏保存到若干文件中，供之后的.c文件或Makefile文件所包含（使用include）。这样，在C语言源文件或makefile脚本中通过对这些宏加以判断，就可以在编译时使用或抛弃某些特定的功能。</p>
-<h2 id="三c语言中检测宏是否被定义">三、C语言中检测宏是否被定义</h2>
-<h3 id="使用条件编译指令">1、使用条件编译指令</h3>
-<p>在C语言源文件中，可以使用条件编译指令</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> FOO</span><br>  ...<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
-<p>将宏<code>FOO</code>对应功能的代码包围起来，如果在<code>menuconfig</code>中勾选了该宏所对应的选项，则宏<code>FOO</code>会被定义，最终这段代码也会被编译。</p>
-<h3 id="使用宏定义">2、使用宏定义</h3>
-<p>除了使用条件编译指令，代码框架还提供了另一种方式检测某个宏是否被定义。之所以要使用另一种方式，是因为条件编译指令不能使用在宏定义中，而频繁地使用条件编译指令会使代码的可读性大打折扣。实现这个功能的关键代码包括：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// macro.h</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifndef</span> _MACRO_H_</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> _MACRO_H_</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> str_temp(x) #x</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> str(x) str_temp(x)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> isdef(macro) (strcmp(<span class="hljs-meta-string">&quot;&quot;</span> #macro, <span class="hljs-meta-string">&quot;&quot;</span> str(macro)) != 0)</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
-<p>其中宏<code>str(x)</code>使用<code>#</code>运算符将<code>x</code>转化为一个字符串。下面举一个例子来说明<code>isdef</code>这个宏是怎么工作的：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// main.c</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;macro.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FOO 123</span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">int</span> a = isdef(FOO);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>经过预处理</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">gcc -o main.i -E main.c<br></code></pre></td></tr></table></figure>
-<p>main.i中的内容为：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// main.i</span><br>...<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">int</span> a = (<span class="hljs-built_in">strcmp</span>(<span class="hljs-string">&quot;&quot;</span> <span class="hljs-string">&quot;FOO&quot;</span>, <span class="hljs-string">&quot;&quot;</span> <span class="hljs-string">&quot;123&quot;</span>) != <span class="hljs-number">0</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br>...<br></code></pre></td></tr></table></figure>
-<p>可以发现，<code>strcmp</code>函数的第一个参数对应<code>isdef</code>宏定义中的<code>"" #macro</code>，它直接将宏参数的名称转换为了字符串，而第二个参数对应<code>"" str(macro)</code>，它先将<code>FOO</code>替换为<code>123</code>，然后将<code>123</code>转换为字符串。因此当这两个参数不同时，说明宏已经被定义过。</p>
-<p>    通过上面的分析可以发现，宏<code>isdef</code>不能检测宏定义的值与宏定义名称相同的宏，比如说</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FOO FOO</span><br></code></pre></td></tr></table></figure>
-<p>宏<code>FOO</code>在预处理时仍然被替换为<code>FOO</code>，最后将导致错误的结果。</p>
-<p>四、参考资料</p>
-<ul>
-<li><p><a href="https://stackoverflow.com/questions/26099745/test-if-preprocessor-symbol-is-defined-inside-macro">stackoverflow上关于如何判断宏是否被定义的讨论</a></p></li>
-<li><p><a href="https://github.com/NJU-ProjectN/ics-pa">南京大学ics-pa项目</a></p></li>
-</ul>
-]]></content>
-      <categories>
-        <category>NEMU</category>
-      </categories>
-      <tags>
-        <tag>C语言</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>nju-pa摸鱼记2-计算机与λ演算</title>
     <url>/2022/02/01/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B02-%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%8E%CE%BB%E6%BC%94%E7%AE%97/</url>
     <content><![CDATA[<h2 id="一前言">一、前言</h2>
@@ -431,8 +372,8 @@ A&amp;\rightarrow \alpha X \cdot &amp;(3)\\
         <category>NEMU</category>
       </categories>
       <tags>
-        <tag>C语言</tag>
         <tag>理论计算机科学</tag>
+        <tag>C语言</tag>
       </tags>
   </entry>
   <entry>
@@ -549,17 +490,23 @@ A = \begin{bmatrix}
       </tags>
   </entry>
   <entry>
-    <title>三月三十一日于西北食堂用午餐作诗一首</title>
-    <url>/2022/04/01/%E4%B8%89%E6%9C%88%E4%B8%89%E5%8D%81%E4%B8%80%E6%97%A5%E4%BA%8E%E8%A5%BF%E5%8C%97%E9%A3%9F%E5%A0%82%E7%94%A8%E5%8D%88%E9%A4%90%E4%BD%9C%E8%AF%97%E4%B8%80%E9%A6%96/</url>
-    <content><![CDATA[<p><img src="/img/0401-1.jpg" /></p>
-<blockquote>
-<p>三奎肉饭十六元，三两口就全吃完。<br />
-西北食堂物价高，以后换个小点盘。</p>
-</blockquote>
+    <title>Hello World</title>
+    <url>/1970/01/01/hello-world/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+<h2 id="quick-start">Quick Start</h2>
+<h3 id="create-a-new-post">Create a new post</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo new <span class="hljs-string">&quot;My New Post&quot;</span><br></code></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
+<h3 id="run-server">Run server</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo server<br></code></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
+<h3 id="generate-static-files">Generate static files</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo generate<br></code></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
+<h3 id="deploy-to-remote-sites">Deploy to remote sites</h3>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo deploy<br></code></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
 ]]></content>
-      <categories>
-        <category>blog</category>
-      </categories>
   </entry>
   <entry>
     <title>使用 nginx 在服务器上反向代理 Tomcat</title>
@@ -584,6 +531,19 @@ A = \begin{bmatrix}
       </tags>
   </entry>
   <entry>
+    <title>三月三十一日于西北食堂用午餐作诗一首</title>
+    <url>/2022/04/01/%E4%B8%89%E6%9C%88%E4%B8%89%E5%8D%81%E4%B8%80%E6%97%A5%E4%BA%8E%E8%A5%BF%E5%8C%97%E9%A3%9F%E5%A0%82%E7%94%A8%E5%8D%88%E9%A4%90%E4%BD%9C%E8%AF%97%E4%B8%80%E9%A6%96/</url>
+    <content><![CDATA[<p><img src="/img/0401-1.jpg" /></p>
+<blockquote>
+<p>三奎肉饭十六元，三两口就全吃完。<br />
+西北食堂物价高，以后换个小点盘。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>blog</category>
+      </categories>
+  </entry>
+  <entry>
     <title>记计算所夏令营经历</title>
     <url>/2022/07/21/%E8%AE%B0%E8%AE%A1%E7%AE%97%E6%89%80%E5%A4%8F%E4%BB%A4%E8%90%A5%E7%BB%8F%E5%8E%86/</url>
     <content><![CDATA[<blockquote>
@@ -602,6 +562,158 @@ A = \begin{bmatrix}
 <h1 id="后记">后记</h1>
 <p>最离奇的经历无非就是面试过程中的“中断”，那么“另一个我”到底是谁呢？也许是我的深层的意识。这也许与我在学习中一贯采取的“不求甚解”的方法论有关系。</p>
 <p>所谓的“不求甚解”，指的是我在学习知识时，尤其是第一次学习新东西时，通常遇到我无法理解的东西，不会花过多的时间和经历“死磕”。这不是矛盾的吗？什么东西都不弄懂，那最后不是什么都没学会？第一次没搞明白的东西，其实在试图理解的这个过程中，大脑已经在不知不觉中加深了印象，只是我自己还不认可。那么，当未来的某个时间点，又遇到它的时候，原来的印象迅速地被调用出来，在完全不同的情景、灵感下，很容易对之前不理解的东西产生新的启发。虽然新的探索可能仍然是失败的，但是它又进一步加深了大脑对知识的印象。久而久之，一般三五次，在不同的启发之下，许多知识便被我不自觉地掌握了。</p>
+]]></content>
+      <categories>
+        <category>blog</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>nju-pa摸鱼记1-宏的妙用</title>
+    <url>/2022/01/31/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B01-%E5%AE%8F%E7%9A%84%E5%A6%99%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="一前言">一、前言</h2>
+<p>上学期在课内学习了《计算机体系结构》，一直对最后一章老师讲到的硬件模拟器念念不忘，好奇它的工作原理。好巧不巧，某日在我刷github的时候南京大学的<a href="https://github.com/NJU-ProjectN/ics-pa">ics-pa项目</a>出现在了我的首页推荐中，于是我便打算利用寒假的时间过一下这个项目，并通过<a href="https://www.bilibili.com/read/cv15072569">B站的专栏</a>（现在同步到我的个人博客上）记录一些新的知识或者是心得体会。</p>
+<h2 id="二使用宏配置编译选项">二、使用宏配置编译选项</h2>
+<p>在项目代码进行编译前，需要先使用</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">make menuconfig<br></code></pre></td></tr></table></figure>
+<p>对项目进行配置，在勾选了一些选项退出后，<code>menuconfig</code>会根据之前的选项生成一些宏保存到若干文件中，供之后的.c文件或Makefile文件所包含（使用include）。这样，在C语言源文件或makefile脚本中通过对这些宏加以判断，就可以在编译时使用或抛弃某些特定的功能。</p>
+<h2 id="三c语言中检测宏是否被定义">三、C语言中检测宏是否被定义</h2>
+<h3 id="使用条件编译指令">1、使用条件编译指令</h3>
+<p>在C语言源文件中，可以使用条件编译指令</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> FOO</span><br>  ...<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
+<p>将宏<code>FOO</code>对应功能的代码包围起来，如果在<code>menuconfig</code>中勾选了该宏所对应的选项，则宏<code>FOO</code>会被定义，最终这段代码也会被编译。</p>
+<h3 id="使用宏定义">2、使用宏定义</h3>
+<p>除了使用条件编译指令，代码框架还提供了另一种方式检测某个宏是否被定义。之所以要使用另一种方式，是因为条件编译指令不能使用在宏定义中，而频繁地使用条件编译指令会使代码的可读性大打折扣。实现这个功能的关键代码包括：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// macro.h</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifndef</span> _MACRO_H_</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> _MACRO_H_</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> str_temp(x) #x</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> str(x) str_temp(x)</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> isdef(macro) (strcmp(<span class="hljs-meta-string">&quot;&quot;</span> #macro, <span class="hljs-meta-string">&quot;&quot;</span> str(macro)) != 0)</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
+<p>其中宏<code>str(x)</code>使用<code>#</code>运算符将<code>x</code>转化为一个字符串。下面举一个例子来说明<code>isdef</code>这个宏是怎么工作的：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// main.c</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;macro.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FOO 123</span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">int</span> a = isdef(FOO);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>经过预处理</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">gcc -o main.i -E main.c<br></code></pre></td></tr></table></figure>
+<p>main.i中的内容为：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// main.i</span><br>...<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">int</span> a = (<span class="hljs-built_in">strcmp</span>(<span class="hljs-string">&quot;&quot;</span> <span class="hljs-string">&quot;FOO&quot;</span>, <span class="hljs-string">&quot;&quot;</span> <span class="hljs-string">&quot;123&quot;</span>) != <span class="hljs-number">0</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br>...<br></code></pre></td></tr></table></figure>
+<p>可以发现，<code>strcmp</code>函数的第一个参数对应<code>isdef</code>宏定义中的<code>"" #macro</code>，它直接将宏参数的名称转换为了字符串，而第二个参数对应<code>"" str(macro)</code>，它先将<code>FOO</code>替换为<code>123</code>，然后将<code>123</code>转换为字符串。因此当这两个参数不同时，说明宏已经被定义过。</p>
+<p>    通过上面的分析可以发现，宏<code>isdef</code>不能检测宏定义的值与宏定义名称相同的宏，比如说</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FOO FOO</span><br></code></pre></td></tr></table></figure>
+<p>宏<code>FOO</code>在预处理时仍然被替换为<code>FOO</code>，最后将导致错误的结果。</p>
+<p>四、参考资料</p>
+<ul>
+<li><p><a href="https://stackoverflow.com/questions/26099745/test-if-preprocessor-symbol-is-defined-inside-macro">stackoverflow上关于如何判断宏是否被定义的讨论</a></p></li>
+<li><p><a href="https://github.com/NJU-ProjectN/ics-pa">南京大学ics-pa项目</a></p></li>
+</ul>
+]]></content>
+      <categories>
+        <category>NEMU</category>
+      </categories>
+      <tags>
+        <tag>C语言</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>第六届“龙芯杯”大赛参赛总结</title>
+    <url>/2022/08/23/%E7%AC%AC%E5%85%AD%E5%B1%8A%E2%80%9C%E9%BE%99%E8%8A%AF%E6%9D%AF%E2%80%9D%E5%A4%A7%E8%B5%9B%E5%8F%82%E8%B5%9B%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<blockquote>
+<p>第六届“龙芯杯”大赛已经落下帷幕，我所在的队伍是我们学校唯一的团队赛参赛队，最终获得了三等奖的成绩。</p>
+</blockquote>
+<h1 id="比赛简介">比赛简介</h1>
+<p>“龙芯杯”大赛是全国大学生计算机系统能力大赛（英文简称 NSCSCC）的赛道之一，NSCSCC 总共有 3 个赛道，分别为：</p>
+<ul>
+<li>操作系统：主要是做系统软件方面的工作</li>
+<li>编译系统：构建编译系统并进行编译优化</li>
+<li>CPU：设计并实现一个计算机系统，并能够运行系统软件</li>
+</ul>
+<p>“龙芯杯”则对应 CPU 赛道。“龙芯杯”下又分 3 项赛事，分别为：</p>
+<ul>
+<li>个人赛：该赛事我校无人参加，具体内容不太清楚；</li>
+<li>团队赛：基于 MIPS32I 实现计算机系统，要求通过大赛提供的功能、性能和系统测试。团队赛分为初赛和决赛，能否进入决赛主要看前面 3 项测试得分；决赛排名主要看性能得分、系统完备性（稳定启动操作系统、支持外设）和答辩表现；</li>
+<li>LoongArch 挑战赛：第六届“龙芯杯”新增赛事，据说只有成功启动操作系统才能进入决赛。</li>
+</ul>
+<h1 id="比赛筹备">比赛筹备</h1>
+<blockquote>
+<p>须知少日拏云志，曾许人间第一流。</p>
+</blockquote>
+<h2 id="开始契机">开始契机</h2>
+<p>我们是从寒假里开始准备比赛的（寒假在二月份，比赛最终提交是当年的八月份），因此实际上有半年左右的准备时间。具体开始的契机是上届参加比赛的学长在寒假里组织了参赛培训。培训结束后，同班的徐同学问我是否有组队意愿，我正好也准备参加比赛，于是我们一拍即合，创建了队伍。</p>
+<h2 id="第一个流水线">第一个流水线</h2>
+<p>真正开始设计是开学后，当时我们聚在一起商量了一下，决定花一到两周的时间重写上学习体系结构的五级流水线，最后看谁的时序较好。这时候我正好在自学 chisel，于是我先用 chisel 写了一个简单的 <a href="https://github.com/MiaoHao-oops/naive-chisel-project">LoongArch32 CPU 核</a>练手。写完后，我陷入了抉择：是使用 chisel 进行开发，还是继续使用熟悉的 Verilog？思量过后我决定还是使用 Verilog 更为稳妥，毕竟是团队赛事，翻车了可是 4 个人的心血。于是，我开始使用 Verilog 重写流水线。</p>
+<p>我们第一次商量的结果是将五级改为四级，去掉看上去没什么用的写回级，以减轻流水线刷新的惩罚。在我重构的代码中，主要的改动有下：</p>
+<ul>
+<li>将流水线控制逻辑由“互锁式”改为“无互锁式”（参考了《计算机组成与设计--硬件/软件接口》）</li>
+<li>去掉写回级，将流水线缩短为四级</li>
+<li>将指令集替换为 MIPS</li>
+<li>加入了自行编写的华莱士树乘法器和位移除法器</li>
+</ul>
+<p>完成了基本功能的调试后，一跑综合，时钟频率竟然能达到惊人的 120 MHz。两周过后，大家似乎都比较忙，只有我将代码完全从头写了一遍，因此也基本确定了由我来进行内核设计和开发的分工。</p>
+<h2 id="丰富流水线的功能">丰富流水线的功能</h2>
+<p>完成了基本的流水线后，我按照上学期的思路开始增加例外处理和类-SRAM 总线，其他同学则按照分工开始做 Cache 和 TLB。例外处理的实现相对而言比较简单，最让人头疼的是类-SRAM 总线上事务的取消。</p>
+<p>在流水线中，经常会遇到重定向请求冲刷流水线，这时取指或访存的事务就需要被取消。取消这些进行中的事务在我看来是一个比较繁琐的过程，原因有三：</p>
+<ol type="1">
+<li>重定向随时都可能发生，此时事务处理可能处在任何一个阶段；</li>
+<li>总线协议无法对一个已经请求握手的协议进行直接取消，只能由流水线取回再丢弃；</li>
+<li>类-SRAM 总线需要主方保证返回的数据一定有地方缓存。</li>
+</ol>
+<p>最终，纠结了几天后，我打算采用一种队列的结构处理访存请求。这主要是因为类-SRAM 总线上返回数据的顺序与发起请求顺序一致，于是便可以借助队列结构简化访存逻辑。而对于事务取消，在队列里对应的访存请求上添加一个 cancel 标记即可，加入标记的请求仍然继续访存，只不过流水线直接将其丢弃。这种“队列化”的访存控制器一直沿用到最终设计的取指部分，访存由于不存在“取消正在执行的事务”这种需求而采用了“流水化”的控制器。</p>
+<p>另一方面，由于初赛不需要 TLB，因此另一项重要的工作是将 cache 接入 CPU 核。在之前的课程中，由于时间关系，我们最终并没有将 cache 接入 CPU 的经验，因此调试起来花费了一番功夫。由于核内和访存子系统分别由我和徐同学开发，因此调试时常常需要约个事件一块看波形，谁也没法保证自己负责的部分是完全正确的。</p>
+<p>一个学期过的很快，在开始的一个月过后，由于学业压力，我们的开发过程也被迫暂停了，之后的很长一段时间里进展都十分缓慢。</p>
+<h2 id="前后端分离">前后端分离</h2>
+<p>这一个学期里，流水线最大变化是进行了前后端的分离。所谓前端，指的是流水线中负责取回指令的部分；而后端则是负责执行指令、改变处理器状态的部分。分离前后段的核心是一个指令队列，它的功能如下：</p>
+<ul>
+<li>暂存前端取回但还无法向后端发射的指令（取指宽度小于发射宽度）</li>
+<li>切断从写回级一直反串到取指流水级的控制信号</li>
+</ul>
+<p>经过前后端分离后，我又进一步修改前端和 i-cache，将取指宽度拓宽为了 16B（4 条指令）。做前后端分离本是为了之后改双发射做准备，但遗憾的是，最终未能尝试双发射结构，决赛提交的是一个单发射流水线。</p>
+<h2 id="弄巧成拙的延迟槽">弄巧成拙的延迟槽</h2>
+<p>在之前的课程中，老师常说 MIPS 的延迟槽是一个历史包袱，之前说实话我并不理解这句话的含义，直到开始做分支预测器。分支预测器是由另外两位罗同学和肖同学负责的，罗同学先写了一个简单的基于局部历史和两位饱和计数器的预测器，而肖同学则依据调研的论文进行设计。拿到罗同学的预测器，我按照核内的需求修改了接口，但是很快遇到了一个问题。</p>
+<p>MIPS 最著名的特征之一便是转移延迟槽，它的设计初衷是在发生分支跳转时能够少刷掉一条指令，从而提升 IPC。但是，对于非同步 RAM 的访存接口和分支预测来说，它却成了一个“包袱”。遇到的问题是：</p>
+<ul>
+<li>如何保证分支发生时，延迟槽指令一定被取回了？由哪个阶段来保证？</li>
+<li>分支预测时，发生分支的指令到底是分支指令？还是延迟槽指令？</li>
+</ul>
+<p>如何解决这个问题？我陷入了思考。解决这个问题的关键在与如何理解“分支”：从处理器外部看来，分支的发生将原本顺序的取指序地址转移到了另一个位置。在想明白“分支”后，对于 MIPS 而言，发生取指地址转移的位置是延迟槽指令，而非分支指令。于是，自然想到将所有分支在流水线中的发生都延迟到延迟槽指令进行，让延迟槽真正成为延迟槽。这样便解决了上面的两个问题：</p>
+<ul>
+<li>分支发生由延迟槽指令发起，流水线只需要刷掉后面所有指令即可，无需保证；</li>
+<li>分支预测的对象应为延迟槽指令。</li>
+</ul>
+<p>具体实现方法是：分支指令流过执行级时不会立刻触发分支，而是拨动一个“开关”，告诉下一条延迟槽指令是否需要触发分支；待延迟槽指令到达执行级时再触发分支。</p>
+<h2 id="尝试启动-ucore">尝试启动 ucore</h2>
+<p>实际上在启动 ucore 前，就已经调试过一个系统软件，也就是大赛初赛要求的系统测试。该系统测试全部使用汇编语言编写，但与功能、性能测试不同的是，需要将 CPU 核集成到一个小型的 SOC 中，操作 UART 控制器这样的外设。由于系统中存在外设，也就不能再通过仿真进行调试，好在 Vivado 工具链中包含一种基于内部逻辑分析单元（ILA）的在线调试工具。它的工作原理是：通过在 SOC 中加入 ILA 单元（综合后占用一些硬件资源）连接到想要抓取的信号上，然后在上板时设定一些触发条件，抓取满足触发条件的时刻附近的波形。上板调试的难度在于真正的硬件具有一定的随机性，不会像仿真那样每次跑出来的结果都一样。而解决的办法也只能是在随机中找规律，按照代码一个函数一个函数地检查，最终定位 CPU 卡住/出错的地方。最后我们发现，大多数错误都与 uncache 访存有关，访存顺序和访存大小都是需要特别注意的。</p>
+<p>真正开始尝试启动 ucore 已经是决赛提交前夕。经过我与徐同学的讨论，我们决定跳过 PMON 直接启动 ucore。一方面是因为启动 PMON 需要额外添加若干指令，而我们又没有测试这些指令的代码和环境，从头搭建又要花许多时间，但 ucore 需要添加的指令不多，可以等遇到了再调试；另一方面是因为 ucore 本身体积不大，可以直接烧录到板载的 flash 中，再用一个简易的 bootloader 将其加载到内存中，而无需先启动 PMON 这样稍微复杂一些的 BIOS 兼 bootloader。</p>
+<p>由于我们没有搭建 SOC 的经验，因此一开始启动 ucore 时使用的是大赛提供的 soc_up，该 SOC 中支持不少外设，但 ucore 中只有 UART 驱动，因此在接入 CPU 核时我删掉了其他用不到的外设。启动 ucore 主要遇到了两大问题：一是 UART 在读取数据时总是和输入差了 15 个字符；二是进入内核后常陷入例外，多为保留指令和 TLB 例外。</p>
+<p>对于第二个问题，经过上板排查后发现是 TLB 例外在 MIPS 规范中的一个空洞。我们的 TLB 延续了体系结构实验中的“并行查找”风格，各 TLB 项之间没有任何优先级；而 ucore 在处理充填的过程中也没有保证同一个虚拟双页对应的 TLB 项唯一，结果运行时一旦遇到同时命中 2 项的虚地址，转换出来的物理地址将会是错误的，于是取指和访存都会受到影响。于是修改了 TLB 充填的函数，便解决了这个问题。</p>
+<p>而对于第一个问题，由于当时没有其他的思路，于是我决定从头搭一个 SOC，如果还有问题，只能是软件或 CPU 核的问题。当然从头搭 SOC 不是那么容易的，首先就是在实验课中完全没有过相关的经历和理解，而我则是参看了《计算机系统设计（下册）》后才知道 Vivado 中有一个 Block Design 的功能能够基于 IP 进行 SOC 搭建。在练习使用了几天 Block Design 后，我开始着手进行 SOC 的搭建。在整个 SOC 中，除了 CPU 核之外，必需的外设有：UART、SPI、GPIO（confreg）以及 DDR3。</p>
+<p>其中，最为复杂的是 DDR3 控制器，它通过调用 Xilinx IP 核 memory interface generator 来实现。首先是参数配置的复杂，其次是时钟输入的复杂，最后则是复位信号的复杂。不过还好，我参考了清华大学往届的 <a href="https://github.com/trivialmips/nontrivial-mips">nontrivial-mips</a> 项目，从中获取了许多启发和设计思路，最终完成了 DDR3 控制器的集成。</p>
+<p>结果，使用了新的 SOC 后，UART 问题仍然存在。我觉得更有可能是软件的问题，因为新 SOC 中的 UART 控制器调用的是 Xilinx IP 核 AXI UART 16550，在查阅手册之后我发现寄存器空间与之前不兼容，也许在功能上也有一些细微的差别是我没有注意到的。查手册之余，我在 github 上找到了它的官方驱动程序仓库，于是便照着修改。还是不行。那只能一点一点试了，所有问题集中在 UART 初始化的函数中，我不断改变初始化参数，最后发现只要将 UART 的队列功能关闭，输入即可正常使用（奇怪的是 ucore 最开始的时候默认就是将其关闭的，但是在原来的 SOC 中仍然有这个问题）。</p>
+<p>解决了 UART 的问题后，ucore 可以在新的 SOC 上运行了，尽管不是特别稳定。</p>
+<h2 id="决赛前的冲刺">决赛前的冲刺</h2>
+<p>大赛要求启动系统后能够运行一些软件来展示系统的完备性，我觉得可以把功能测试里的“记忆游戏”移植到 ucore 中运行。一是它的内容比较简单，移植起来难度不是很大；二是它需要操作 4 种板载外设，也可以证明系统的完备性。在与徐同学交流了我的想法后，他决定试试，最后，他花了不到一天的时间就将记忆游戏成功移植到了 ucore 上运行。</p>
+<p>决赛的前一天，我进行性能测试计数时发现了一个诡异的异常：第三个测试点在某些情况下显示结果异常。经过一上午紧张的调试，我们发现又是访存的问题！修改了 d-cache 中不到一行的代码，这个问题得到了解决，修改后的版本也成了我们最终决赛的提交版本。</p>
+<h1 id="决赛现场">决赛现场</h1>
+<p>团队赛的决赛除了可以由大赛组委进行核查的功能、性能、系统测试外，还增加了自定义指令添加和答辩的环节。</p>
+<h2 id="自定义指令添加">自定义指令添加</h2>
+<p>指令添加最多只允许两名队员参加，于是这个任务便落到了参与核内开发最多的我和徐同学身上。受疫情的影响，决赛全部改为线上进行，我和徐同学提前到教学楼 6 楼找了一个偏僻的教室，这时还没开课，应该也不会有什么人来教学楼。</p>
+<p>下午两点，添加指令环节开始，赛题在微信群里公布，还附带了进行仿真的 coe 文件。赛题并不难，我们大致经过不到 30 分钟就通过了仿真。而后上板时，我们发现单色 LED 的亮灭情况似乎和正常的功能测试有所不同，后来阅读了测试代码后才发现是大赛组委为了区分而有意为之，也算是虚惊一场。</p>
+<p>答题后的队伍进入了一个指定会议室进行等待，这个环节也不需要提交什么文件，而是由会议中的老师在线进行验收，过程就和实验课差不多。</p>
+<h2 id="答辩">答辩</h2>
+<p>答辩是整个比赛的最后一个环节，也就是结合事先准备好的 PPT 进行报告，报告后回答一些专家的问题。说起来答辩有一些遗憾，一个是我在回答第一专家的问题是一直没说到点上，多亏了另一位老师比较熟悉我们的代码风格才帮我们解了围；另一个是在画流水线结构图时由于疏忽没画 TLB，被专家发现并做了提醒。</p>
+<h1 id="参赛总结">参赛总结</h1>
+<blockquote>
+<p>悟已往之不谏，知来者之可追。</p>
+</blockquote>
+<h2 id="收获">收获</h2>
+<p>参加“龙芯杯”的收获还是很多的，主要是两点：</p>
+<ul>
+<li><p>系统能力：经历了从 SOC 到系统软件的全栈式开发、移植和调试，对金算计体系结构的深度和广度都有了更加深入的理解和运用；</p></li>
+<li><p>工程能力：从建立文件夹开始管理整个项目，并且使用、熟悉了整个 IC 前端的设计流程，学会运用一些之前从未使用过的工具进行 SOC 设计。</p></li>
+</ul>
+<h2 id="不足">不足</h2>
+<p>“龙芯杯”每年赛题固定的比赛性质势必导致竞争越来越激烈，相比于其他赛道，它更像是一个已知题目的“命题作文”。命题作文想要写好看重的是积累，对于清华大学这样的强校，几乎连年包揽特等奖和一等奖，很大程度上得益于较为完整的基础设施。这里的基础设施包括但不限于：</p>
+<ul>
+<li>设计流程、设计语言和设计方法</li>
+<li>调试工具链</li>
+<li>完整的系统软件移植</li>
+</ul>
+<p>有了这些基础，他们的起步便已经比我们高很多了。反观我校，我们几乎是从零开始（此处并没有苛责学长的意思，我们十分感激对我们提供过帮助的竞赛小组中的各位学长）。说到底，一方面还是人太少，就更加难成体系；一方面是课程安排上接触专业内容太晚，难以形成积淀。其他学校的实力都是每年上升，而我们还在原地踏步，恐怕之后拿奖都难。</p>
+<p>受到设计方法直接影响的是分工问题，核内模块之间紧耦合，难以拆散分配到每个人身上，这就导致了人员分工极不平衡，没有发挥出 4 人队伍的全部实力。</p>
+<h2 id="反思">反思</h2>
+<p>今年过去，我们也成为学弟口中的学长，我们能为他们留下什么？我们的经验是好的经验吗？“龙芯杯”竞赛小组将被引向何方？当这些担子真实地落到肩上，才深感责任之重大。可以肯定的是，走老路是不行的。</p>
 ]]></content>
       <categories>
         <category>blog</category>
