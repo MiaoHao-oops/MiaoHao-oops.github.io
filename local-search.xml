@@ -4,6 +4,33 @@
   
   
   <entry>
+    <title>ubuntu 打开热点共享网络</title>
+    <link href="/2022/09/05/ubuntu-%E6%89%93%E5%BC%80%E7%83%AD%E7%82%B9%E5%85%B1%E4%BA%AB%E7%BD%91%E7%BB%9C/"/>
+    <url>/2022/09/05/ubuntu-%E6%89%93%E5%BC%80%E7%83%AD%E7%82%B9%E5%85%B1%E4%BA%AB%E7%BD%91%E7%BB%9C/</url>
+    
+    <content type="html"><![CDATA[<h2 id="问题">问题</h2><p>在 ubuntu 的 <code>settings -&gt; Wi-Fi -&gt; ...</code>中，有一个“Turn on Wi-Fihotspot”选项。但遗憾的是，该选项是灰色的，无法直接通过系统自带的设置打开热点。</p><h2 id="解决">解决</h2><p>在网上搜索后，找到了一种可行的办法，步骤如下：</p><ol type="1"><li><code>Alt + F2</code>，在弹出的输入框中输入<code>nm-connection-editor</code>；</li><li>点击 <code>+</code>，类型选择 Wi-Fi；</li><li>随意设置 SSID 和 Connection Name；</li><li>Wi-Fi Security 选择<code>WPA &amp; WPA2 Personal</code>，设置连接密码；</li><li>点击 <code>apply</code> 后，Wi-Fi设置界面已经出现了相应的热点信息；</li><li>关闭后再次打开需要在 <code>...</code> 中选择<code>Connect to Hidden Network</code>，然后选择热点对应的连接即可。</li></ol>]]></content>
+    
+    
+    <categories>
+      
+      <category>note</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>软件配置</tag>
+      
+      <tag>计算机网络</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>第六届“龙芯杯”大赛参赛总结</title>
     <link href="/2022/08/23/%E7%AC%AC%E5%85%AD%E5%B1%8A%E2%80%9C%E9%BE%99%E8%8A%AF%E6%9D%AF%E2%80%9D%E5%A4%A7%E8%B5%9B%E5%8F%82%E8%B5%9B%E6%80%BB%E7%BB%93/"/>
     <url>/2022/08/23/%E7%AC%AC%E5%85%AD%E5%B1%8A%E2%80%9C%E9%BE%99%E8%8A%AF%E6%9D%AF%E2%80%9D%E5%A4%A7%E8%B5%9B%E5%8F%82%E8%B5%9B%E6%80%BB%E7%BB%93/</url>
