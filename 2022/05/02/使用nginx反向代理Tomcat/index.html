@@ -249,15 +249,31 @@
             
             <div class="markdown-body">
               <h2 id="反向代理概述">反向代理概述</h2>
-<p>在服务器上使用 nginx 软件并添加相关配置就可以实现反向代理。所谓反向代理，就是通过访问代理服务器（安装并配置了 nginx）的特定端口或域名，将访问请求转发到其他服务器或其他服务上。举例来说，我在服务器上运行了 Tomcat 软件，它打开的是 <code>localhost:8080</code>，现在我想通过服务器的 IP 地址从外网访问 Tomcat 服务（比如：<code>服务器IP:8082</code>），那么这时就可以使用 nginx 进行反向代理。在上面的例子里，nginx 的大致工作过程是：经过配置后，nginx 将开始监听服务器的 <code>8082</code> 端口，当服务器收到来自 <code>8082</code> 端口的访问请求时，nginx 将请求转发到 <code>localhost:8080</code>，返回数据也是同样的过程，相当于 nginx 在中间起到了仲裁的作用。</p>
+<p>在服务器上使用 nginx
+软件并添加相关配置就可以实现反向代理。所谓反向代理，就是通过访问代理服务器（安装并配置了
+nginx）的特定端口或域名，将访问请求转发到其他服务器或其他服务上。举例来说，我在服务器上运行了
+Tomcat 软件，它打开的是
+<code>localhost:8080</code>，现在我想通过服务器的 IP 地址从外网访问
+Tomcat 服务（比如：<code>服务器IP:8082</code>），那么这时就可以使用
+nginx 进行反向代理。在上面的例子里，nginx
+的大致工作过程是：经过配置后，nginx 将开始监听服务器的 <code>8082</code>
+端口，当服务器收到来自 <code>8082</code> 端口的访问请求时，nginx
+将请求转发到 <code>localhost:8080</code>，返回数据也是同样的过程，相当于
+nginx 在中间起到了仲裁的作用。</p>
 <h2 id="配置过程">配置过程</h2>
-<p>我的服务器上的 nginx 配置文件位于 <code>/usr/local/nginx/conf/nginx.conf</code> 中，在文件的 <code>http&#123; ... &#125;</code> 大括号中加入：</p>
+<p>我的服务器上的 nginx 配置文件位于
+<code>/usr/local/nginx/conf/nginx.conf</code> 中，在文件的
+<code>http&#123; ... &#125;</code> 大括号中加入：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><pre><code class="hljs conf">server<br>&#123;<br>    listen 8082;<br>    server_name _;<br><br>    location / &#123;<br>        proxy_pass http://localhost:8080/;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>然后重启 nginx （我这里使用的是 lnmp，也可以使用不同的方法重启 nginx）：</p>
+<p>然后重启 nginx （我这里使用的是 lnmp，也可以使用不同的方法重启
+nginx）：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">sudo lnmp nginx restart<br></code></pre></td></tr></table></figure>
-<p>现在，在浏览器的地址栏输入 <code>服务器IP:8082</code>，就可以访问运行在服务器上的 Tomcat服务了。</p>
+<p>现在，在浏览器的地址栏输入
+<code>服务器IP:8082</code>，就可以访问运行在服务器上的
+Tomcat服务了。</p>
 <h2 id="小插曲">小插曲</h2>
-<p>实际上在配置完成后我并不能直接访问服务器的 <code>8082</code> 端口，这是因为我使用的阿里云服务器没有对外打开这个端口。需要进入阿里云控制台，在防火墙配置中将该端口打开才能正常访问。</p>
+<p>实际上在配置完成后我并不能直接访问服务器的 <code>8082</code>
+端口，这是因为我使用的阿里云服务器没有对外打开这个端口。需要进入阿里云控制台，在防火墙配置中将该端口打开才能正常访问。</p>
 
             </div>
             <hr>

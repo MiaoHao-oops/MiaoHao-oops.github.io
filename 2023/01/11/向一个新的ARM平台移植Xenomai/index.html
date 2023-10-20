@@ -1,0 +1,804 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="MiaoHao-oops">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文是 Xenomai 内核补丁文档中 ipipe-arm.rst 的翻译，内核版本 4.19.190，Xenomai 版本 3.2.1。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="向一个新的 ARM 平台移植 Xenomai">
+<meta property="og:url" content="http://miaohao-oops.github.io/2023/01/11/%E5%90%91%E4%B8%80%E4%B8%AA%E6%96%B0%E7%9A%84ARM%E5%B9%B3%E5%8F%B0%E7%A7%BB%E6%A4%8DXenomai/index.html">
+<meta property="og:site_name" content="Miao&#39;s Blog">
+<meta property="og:description" content="本文是 Xenomai 内核补丁文档中 ipipe-arm.rst 的翻译，内核版本 4.19.190，Xenomai 版本 3.2.1。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-01-11T10:54:46.000Z">
+<meta property="article:modified_time" content="2023-01-14T06:29:52.760Z">
+<meta property="article:author" content="MiaoHao-oops">
+<meta property="article:tag" content="Linux 内核">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>向一个新的 ARM 平台移植 Xenomai - Miao&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"miaohao-oops.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"appId":"y7tlaLEOoW5C1xBYm8VBo64Q-gzGzoHsz","appKey":"F7gylUefEEtQk24FEbvgfnBi","server_url":"https://y7tlaleo.lc-cn-n1-shared.com","path":"window.location.pathname","ignore_local":true}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.0.0"><link rel="alternate" href="/atom.xml" title="Miao's Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>MiaoHao-oops</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="向一个新的 ARM 平台移植 Xenomai">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2023-01-11 18:54" pubdate>
+        2023年1月11日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      8.9k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      75 分钟
+    </span>
+  
+
+  
+  
+    
+      <!-- LeanCloud 统计文章PV -->
+      <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+        <i class="iconfont icon-eye" aria-hidden="true"></i>
+        <span id="leancloud-page-views"></span> 次
+      </span>
+    
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">向一个新的 ARM 平台移植 Xenomai</h1>
+            
+            <div class="markdown-body">
+              <h2 id="目的">目的</h2>
+<p>本文档是 Gilles Chanteperdrix 为 Xenomai
+项目撰写的文章<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup>的一个延伸，详细介绍了将中断流水线引入
+ARM 内核所带来的变化。</p>
+<p>本文致力于引导读者了解如何移植 I-pipe 核心到一个新的 ARM
+SoC，从而实现一个实时的、双内核的系统。</p>
+<h2 id="术语">术语</h2>
+<p>如果你正在阅读本文档，那么你将有几乎将 I-pipe 运行在一个基于 ARM
+的<em>开发板</em>上。<strong>开发板</strong>的一些例子是：<em>beagleboard</em>，<em>beaglebone</em>，<em>raspberry
+pi</em>。</p>
+<p>开发板是使用了基于 ARM 的 <em>SoC</em> 构建的。一些
+<strong>SoC</strong> 的例子是：Atmel AT91RM9200，Atmel AT91SAM9263，TI
+OMAP3530，TI OMAP4430，Freescale IMX53。我们使用 <em>SoC
+家族</em>粗略地指定一组
+SoC，它们具有许多相似的外设，从而这些外设的驱动程序可以共享。举个例子，对于“AT91”家族，其中包括
+SoC AT91RM9200 和 AT91SAM9263 等等。</p>
+<p>SoC 的核心则是处理器<em>核</em>，它们实现了 ARM
+指令集。处理器<strong>核</strong>的例子有 ARM 926EJ-S，Intel/Marvell
+Xscale，Marvell Feroceon，ARM Cortex A8，ARM Cortex A9。</p>
+<p>最后，处理器核实现了一种 ARM <em>架构</em>，或者说 ARM
+指令集的某个版本。ARM <strong>架构</strong>包括 armv4，armv5，armv6 以及
+armv7。</p>
+<p>举个例子来说，IGEPv2 <em>开发板</em> 使用了 TI OMAP3530
+<em>SoC</em>，属于 OMAP <em>SoC 家族</em>，基于 ARM Cortex A8
+处理器<em>核</em>，实现了 armv7 <em>架构</em>。</p>
+<div class="note note-warning">
+            <p>自 4.14 版本内核开始，I-pipe 已经不再支持 armv4 和 armv5 架构，只有armv6 仍然支持。</p>
+          </div>
+<h2 id="定位需要移植的-arm-架构代码">定位需要移植的 ARM 架构代码</h2>
+<p>在一切开始之前，你应该确定开发板所使用的
+SoC，处理器核以及架构，然后定位到对应的 SoC 以及开发板的特定代码上。</p>
+<p>为了得到这些信息，你可以使用 Linux 内核源码中存在于各个子目录中的
+Kconfig 与 Makefile 文件。Linux 源码通过将目录命名为 arch/arm/mach-X
+或者 arch/arm/plat-X 来指定基于 ARM 的 SoC 或者 SoC 家族
+X。还有一些代码可能位于 drivers/ 目录中，特别是
+drivers/clocksource，drivers/gpio 或者 drivers/irqchip。</p>
+<p>一些由 I-pipe
+核心所管理的设备（硬件计时器，高精度计数器，中断控制器，GPIO
+控制器）也许对于每一个 SoC 都是不同的，因此为了运行
+I-pipe，需要进行适配。</p>
+<div class="note note-info">
+            <p>如果处理器核为 ARM CortexA9，那么事情将会变得稍微简单一点。这是因为其核内集成了中断控制器，硬件计时器和高精度计数器，而这些设备的驱动程序已经被移植到I-pipe 中了。</p>
+          </div>
+<h2 id="硬件计时器">硬件计时器</h2>
+<p>I-pipe 的“客户端”（如协同内核）需要一个可编程的硬件计时器，以
+one-shot 模式进行计时。I-pipe 核心中使用 <code>struct ipipe_timer</code>
+对其进行抽象。</p>
+<p>对于大多数 ARM SoC，硬件计时器的细节对于每一个 SoC 或者 SoC
+家族是特定的，因此在每一个 SoC 的基础上都必须要添加
+<code>ipipe_timer</code> 描述符。有很多方法都可以在 I-pipe
+核心中实现这个计时器描述符。</p>
+<h3 id="a9-计时器">A9 计时器</h3>
+<p>如果你所使用的 SoC 不是基于 ARM Cortex A9 核的，请跳到<a
+href="#非-a9-计时器">下一节</a>。对于搭载了 ARM Cortex A9 核的
+SoC，硬件计时器是由处理器核提供的，与 SoC
+之间关联不大：带来的好处是计时器这部分代码已经在 I-pipe
+核心代码中得到移植，并支持了 <code>struct ipipe_timer</code>
+描述符（详见 arch/arm/kernel/smp_twd.c）。需要注意的是，在为你的 SoC
+编译内核时，应保证将 ARM Cortex A9 的硬件计时器代码编译进内核中。</p>
+<p>为此，你应该确保 <code>smp_twd</code>
+计时器已注册，它声明了一个时钟源，并使用了包含 <em>twd-timer</em>
+的字符串。</p>
+<p>如果 SoC 没有使用 <code>smp_twd</code>
+计时器，并且也没有内核配置选项可以选择它，那么你就需要使用<a
+href="#非-a9-计时器">下一节</a>的方法注册 per-cpu 计时器。</p>
+<div class="note note-info">
+            <p>在某些情况下，Cortex A9 计数器的 Linux 支持代码可能会在 I-pipe更新补丁打上后给出不准确的计时器频率校准结果，这种结果将导致计时器中断提前触发。通过提供适当的设备树，驱动器可以自动确定适当的时钟频率，而无需进行任何不精确的校准。</p>
+          </div>
+<h3 id="非-a9-计时器">非 A9 计时器</h3>
+<p>你需要看一看你使用的 SoC 的硬件计时器支持代码。通常情况下，可以在
+drivers/clocksource 或 arch/arm/mach-X/time.c 或 arch/arm/plat-Y/time.c
+中找到它们。假设你的开发板使用设备树文件，你应该查找包含
+<code>-timer</code> 的设备，并尝试在上述位置之一找到相应的文件。</p>
+<p>假设硬件计时器是由 <code>clock_event_device</code> 驱动的，并且支持
+one-shot 模式（clock_event_device 的 <code>features</code> 域包含
+<code>CLOCK_EVT_FEAT_ONESHOT</code>），那么你的工作将会变得简单。否则，你需要找到包含硬件计时器寄存器说明的文档，看看它是什么类型的计时器（递减器或带匹配寄存器的自由运行计数器），以及如何工作在
+one-shot 模式下。</p>
+<p>最后你需要决定是协同内核与 Linux
+是共享同一个硬件计时器还是使用不同的计时器（一些 SoC
+拥有好几个可用的硬件计时器）。推荐使用相同的计时器。</p>
+<p><code>ipipe_timer</code> 结构在某种程度上继承了
+<code>clock_event_device</code>
+结构，增加了协同内核通过中断管道（I-pipe）从计时器硬件接收高精度事件所需的一组功能。下列成员被定义在文件
+include/linux/ipipe_tickdev.h 中：</p>
+<ul>
+<li><p><code>int irq</code></p>
+<p>这是计时器中断所使用的 IRQ 号。</p></li>
+<li><p><code>void (*request)(struct ipipe_timer *timer, int steal)</code></p>
+<p>该回调函数将在协同内核开始使用硬件计时器时被 I-pipe
+核心唤醒。它需要将硬件计时器设置为 one-shot 模式。当参数
+<code>steal</code> 的值为 <code>true</code> 时，意味着协同内核获得了
+Linux 内核正在使用的计时器的控制权。</p>
+<p>如果硬件计时器的 Linux 支持代码使用了 <code>clock_event_device</code>
+结构，支持 one-shot 模式，并且 I-pipe 核心与 Linux
+使用同一个计数器，那么这个处理函数可以被移除。在这种情况下，I-pipe
+核心将调用对应 <code>clock_event_device</code> 结构中默认的
+<code>set_mode</code> 处理函数。</p></li>
+<li><p><code>int (*set)(unsigned long ticks, void *timer)</code></p>
+<p>在协同内核请求为硬件计时器写入下一个时钟事件时，该处理函数会被调用。它将控制硬件计时器的流逝以
+<code>ticks</code> 为一个单位。</p>
+<p>举个例子，如果硬件计时器是基于自减器的，那么这个处理函数就应该将自减寄存器设置为
+<code>ticks</code> 值。</p>
+<p>如果硬件计时器是基于一个自由运行的计数器和一个匹配寄存器，这个处理函数则需要将匹配寄存器设置为当前计数器与
+<code>ticks</code> 值之和。</p>
+<p>如果函数运行成功，将返回0；否则，如果延时过短，则将返回一个负值（对于自由运行的计数器和匹配寄存器而言，这种情况可以通过以下方法判断：在设置完匹配寄存器后重新读取计数器的值，如果它超过了匹配寄存器的值，则说明延时过短，导致这个函数运行失败）。</p>
+<p>同样地，如果硬件计时器的 Linux 支持代码使用了
+<code>clock_event_device</code> 结构，支持 one-shot 模式，并且 I-pipe
+核心与 Linux
+使用同一个计数器，那么这个处理函数可以被移除。在这种情况下，I-pipe
+核心将调用对应 <code>clock_event_device</code> 结构中默认的
+<code>set_next_event</code> 处理函数。</p></li>
+</ul>
+<div class="note note-warning">
+            <p>必须注意的是，这个处理函数是在协同内核上下文中被调用的，因此它不会调用任何常规的Linux服务，也不会持有任何常规自旋锁。另外，一个独立的处理函数必须被实现（或者如果需要持有自旋锁，则原本的自旋锁需要被转化为<ahref="#I-pipe-自旋锁">I-pipe自旋锁</a>，需要保证被其覆盖的临界区比较短）。</p>
+          </div>
+<ul>
+<li><p><code>void (*ack)(void)</code></p>
+<p>这个处理函数在计时器中断时被调用，它应该在硬件计时器级别确认计时器中断。提供这样的函数几乎总是必要的。</p>
+<p>如果这个硬件计时器是与 Liunx 共享的，那么这部分代码已经在 Linux
+计时器中断中实现了。这些代码应该被修改为当这个计时器不被协同内核控制时，仅确认计时器中断。参考<a
+href="#例子">例子</a>以避免重复确认。</p></li>
+<li><p><code>void (*release)(struct ipipe_timer *timer)</code></p>
+<p>这个处理函数在协同内核释放硬件计时器时被 I-pipe
+核心调用。它的作用是将计时器恢复到调用 <code>request</code>
+时的状态。举个例子，如果计时器运行在 periodic 模式下，然后
+<code>request</code> 将其切换到了 one-shot
+模式，那么这个处理函数就会将其切换回 periodic 模式。</p>
+<p>同样地，如果硬件计时器的 Linux 支持代码使用了
+<code>clock_event_device</code> 结构，支持 one-shot 模式，并且 I-pipe
+核心与 Linux
+使用同一个计数器，那么这个处理函数可以被移除。在这种情况下，I-pipe
+核心将调用对应 <code>clock_event_device</code> 结构中默认的
+<code>set_mode</code> 处理函数。</p></li>
+<li><p><code>const char *name</code></p>
+<p>计时器的名称。</p>
+<p>如果 I-pipe 核心与 Linux
+使用同一个计数器，那么这个设置可以被移除，这种情况下将使用
+<code>clock_event_device</code> 描述符中该计时器所使用的名称。</p></li>
+<li><p><code>unsigned int rating</code></p>
+<p>计时器的级别。如果支持的多个硬件计时器有不同级别，那么协同内核将使用级别最高的那一个。</p>
+<p>如果 I-pipe 核心与 Linux
+使用同一个计数器，那么这个设置可以被移除，这种情况下将使用
+<code>clock_event_device</code> 描述符中该计时器所使用的级别。</p></li>
+<li><p><code>unsigned long freq</code></p>
+<p>硬件计时器的频率。通常这个值可以通过时钟框架的
+<code>clk_get_rate()</code> 函数获取。</p>
+<p>如果 I-pipe 核心与 Linux
+使用同一个计数器，那么这个设置可以被移除，这种情况下将使用
+<code>clock_event_device</code> 描述符中该计时器所使用的频率。</p></li>
+<li><p><code>unsigned int min_delay_ticks</code></p>
+<p>以 ticks
+计的硬件时钟最小延迟。几乎对于所有基于计数器和匹配寄存器的计时器而言，都有一个阈值，低于该值时将不能编程。当你使用一个过短的值编入这类计时器，其内部的计数器将持续增加，直到溢出后才能与匹配寄存器相匹配，浙江导致整个计时器停止很长一段时间，然后突然重启。</p>
+<p>如果这个最小延迟被称作墙时钟延迟而不是硬件滴答数，函数
+<code>ipipe_timer_ns2ticks()</code> 可以用来进行转换，前提是
+<code>ipipe_timer.freq</code> 已经设置好。</p>
+<p>如果 I-pipe 核心与 Linux
+使用同一个计数器，那么这个设置可以被移除，这种情况下将使用
+<code>clock_event_device</code> 描述符中该计时器所使用的延迟。</p></li>
+<li><p><code>const struct cpumask *cpumask</code></p>
+<p>一个 CPU 掩码包括了这个计时器将要运行的一组 CPU。在 SMP
+系统中，将存在许多 <code>ipipe_timer</code> 结构体，每一个对应 CPU
+掩码中的一个成员。</p>
+<p>如果 I-pipe 核心与 Linux
+使用同一个计数器，那么这个设置可以被移除，这种情况下将使用
+<code>clock_event_device</code> 描述符中该计时器所使用的掩码。</p></li>
+</ul>
+<p>一旦这个结构被声明，有两种方法向 I-pipe 核心注册：</p>
+<ul>
+<li><p>如果硬件计时器的 Linux 支持代码使用了
+<code>clock_event_device</code> 结构，并且 I-pipe 核心与 Linux
+使用同一个计数器，那么其成员 <code>ipipe_timer</code>
+应该指向此结构，相当于在常规内核调用
+<code>clockevents_register_device()</code> 时自动地进行了注册。</p></li>
+<li><p>否则，需要手动调用 <code>ipipe_timer_register()</code>
+进行注册。</p></li>
+</ul>
+<h3 id="例子">例子</h3>
+<p>作为一个例子，我们看一看 I-pipe 核心中 OMAP3 的代码。在引入 I-pipe
+前，代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">irqreturn_t</span> <span class="hljs-title">omap2_gp_timer_interrupt</span><span class="hljs-params">(<span class="hljs-keyword">int</span> irq, <span class="hljs-keyword">void</span> *dev_id)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">clock_event_device</span> *<span class="hljs-title">evt</span> =</span> &amp;clockevent_gpt;<br><br>	__omap_dm_timer_write_status(&amp;clkev, OMAP_TIMER_INT_OVERFLOW);<br><br>	evt-&gt;event_handler(evt);<br>	<span class="hljs-keyword">return</span> IRQ_HANDLED;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>对于函数 <code>__omap_dm_timer_write_status()</code>
+的调用确认了硬件计时器中断的级别。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">clock_event_device</span> <span class="hljs-title">clockevent_gpt</span> =</span> &#123;<br>	.name           = <span class="hljs-string">&quot;gp timer&quot;</span>,<br>	.features       = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,<br>	.shift          = <span class="hljs-number">32</span>,<br>	.set_next_event = omap2_gp_timer_set_next_event,<br>	.set_mode       = omap2_gp_timer_set_mode,<br>&#125;;<br></code></pre></td></tr></table></figure>
+<p>上面的代码展示了 Linux 中对于硬件计时器处理 one-shot
+模式的支持代码。进一步观察表明
+<code>omap2_gp_timer_set_next_event()</code> 没有调用任何 Linux 服务，而
+Linux 服务是无法在 out-of-bound
+上下文中被调用的。因此，这些代码可以安全地与协同内核共享。通过以下修改来支持
+I-pipe 内核：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">omap2_gp_timer_ack</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>	__omap_dm_timer_write_status(&amp;clkev, OMAP_TIMER_INT_OVERFLOW);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">irqreturn_t</span> <span class="hljs-title">omap2_gp_timer_interrupt</span><span class="hljs-params">(<span class="hljs-keyword">int</span> irq, <span class="hljs-keyword">void</span> *dev_id)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">clock_event_device</span> *<span class="hljs-title">evt</span> =</span> &amp;clockevent_gpt;<br><br>	<span class="hljs-keyword">if</span> (!clockevent_ipipe_stolen(evt))<br>		omap2_gp_timer_ack();<br><br>	evt-&gt;event_handler(evt);<br>	<span class="hljs-keyword">return</span> IRQ_HANDLED;<br>&#125;<br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_IPIPE</span><br><span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ipipe_timer</span> <span class="hljs-title">omap_shared_itimer</span> =</span> &#123;<br>	.ack			= omap2_gp_timer_ack,<br>	.min_delay_ticks	= <span class="hljs-number">3</span>,<br>&#125;;<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span> <span class="hljs-comment">/* CONFIG_IPIPE */</span></span><br><br><span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">clock_event_device</span> <span class="hljs-title">clockevent_gpt</span> =</span> &#123;<br>	.features		= CLOCK_EVT_FEAT_PERIODIC |<br>				  CLOCK_EVT_FEAT_ONESHOT,<br>	.rating			= <span class="hljs-number">300</span>,<br>	.set_next_event		= omap2_gp_timer_set_next_event,<br>	.set_state_shutdown	= omap2_gp_timer_shutdown,<br>	.set_state_periodic	= omap2_gp_timer_set_periodic,<br>	.set_state_oneshot	= omap2_gp_timer_shutdown,<br>	.tick_resume		= omap2_gp_timer_shutdown,<br>&#125;;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> __init <span class="hljs-title">omap2_gp_clockevent_init</span><span class="hljs-params">(<span class="hljs-keyword">int</span> gptimer_id,</span></span><br><span class="hljs-params"><span class="hljs-function">						<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *fck_source)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-comment">/* ... */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_IPIPE</span><br>	<span class="hljs-comment">/* ... */</span><br>		omap_shared_itimer.irq = clkev.irq;<br>		clockevent_gpt.ipipe_timer = &amp;omap_shared_itimer;<br>	<span class="hljs-comment">/* ... */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span> <span class="hljs-comment">/* CONFIG_IPIPE */</span></span><br><br>	clockevents_register_device(&amp;clockevent_gpt);<br><br>	<span class="hljs-comment">/* ... */</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="高精度计数器">高精度计数器</h2>
+<p>由于协同内核的计时器管理基于一个运行在 one-shot
+模式的计时器，为了应用能够测量较短的时间间隔，需要使用一个高精度计数器。</p>
+<p>同样地，计数器的使用也与 SoC 有很大的关联。为了纪念第一个在 x86
+处理器上使用 I-pipe 技术运行的 Xenomai 协同内核，这个高精度计数器被称为
+tsc（timestamp counter 的简写）。</p>
+<p>对于计时器管理，一个名为 <code>__ipipe_tscinfo</code>
+的结构体需要被注册到 I-pipe 内核。你需要保证编译选项
+"CONFIG_IPIPE_ARM_KUSER_TSC" 被开启。举个例子，在
+arch/arm/mach-socfpga/Kconfig 中，你将看到：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs csharp">menuconfig ARCH_SOCFPGA<br>	<span class="hljs-built_in">bool</span> <span class="hljs-string">&quot;Altera SOCFPGA family&quot;</span><br>	depends <span class="hljs-keyword">on</span> ARCH_MULTI_V7<br>	...<br>	<span class="hljs-keyword">select</span> IPIPE_ARM_KUSER_TSC <span class="hljs-keyword">if</span> IPIPE<br></code></pre></td></tr></table></figure>
+<h3 id="a9-计数器">A9 计数器</h3>
+<p>如果你使用的 SoC 不是基于 ARM Cortex A9 核的，跳转到<a
+href="#非-a9-计数器">下一节</a>。对于基于 ARM Cortex A9 核的
+SoC，硬件使用的高精度计数器是由处理器核提供的（或者说“全局计时器”）。因为这个硬件是
+SoC 无关的，为了支持 I-pipe 而已经存在的
+<code>__ipipe_tscinfo</code>（arch/arm/kernel/smp_twd.c）可复用。</p>
+<h3 id="非-a9-计数器">非 A9 计数器</h3>
+<p>定义在 arch/arm/include/asm/ipipe.h 的 <code>__ipipe_tscinfo</code>
+结构体拥有如下成员：</p>
+<ul>
+<li><p><code>unsigned int type</code></p>
+<p>计数器的类型，可能的取值为：</p>
+<ul>
+<li><code>IPIPE_TSC_TYPE_FREERUNNING</code></li>
+</ul>
+<p>该 tsc 基于自由运行的计数器</p>
+<ul>
+<li><code>IPIPE_TSC_TYPE_DECREMENTER</code></li>
+</ul>
+<p>该 tsc 基于自减器</p>
+<ul>
+<li><code>IPIPE_TSC_TYPE_FREERUNNING_COUNTDOWN</code></li>
+</ul>
+<p>该 tsc 基于自由运行的计数器，是自减的</p>
+<ul>
+<li><code>IPIPE_TSC_TYPE_FREERUNNING_TWICE</code></li>
+</ul>
+<p>该 tsc
+基于自由运行的计数器，并且需要读取两次（有是会读出错误值，但两次之中总有一次是正确的）</p>
+<p>如果你所使用的硬件不属于上述情况之一，你需要：</p>
+<ol type="1">
+<li><p>添加一个你的硬件所属于的类型（<code>IPIPE_TSC_TYPE_xxx</code>）</p></li>
+<li><p>添加一个读取该计数器并将其扩展到 64
+位值的函数（用汇编语言）。参见 arch/arm/kernel/ipipe_tsc_asm.S 与
+arch/arm/kernel/ipipe_tsc.c
+以获取更多细节。需要注意，汇编函数的实现需要被限制到 96 字节，或者 24 x
+32 比特的指令。</p></li>
+</ol></li>
+<li><p><code>unsigned int freq</code></p>
+<p>计数器的频率</p></li>
+<li><p><code>unsigned long counter_vaddr</code></p>
+<p>计数器的虚拟地址（在内和空间）</p></li>
+<li><p><code>unsigned long u.counter_paddr</code></p>
+<p>计数器的物理地址</p></li>
+<li><p><code>unsigned long u.mask</code></p>
+<p>显示计数器有效比特位的掩码。</p>
+<p>举个例子，0xffffffff 说明是 32 位计数器，0xffff 表示是 16
+位计数器。只有有限的一组值可以表示每种计数器的类型。如果你需要一种不支持的值，arch/arm/kernel/ipipe_tsc.c
+和 arch/arm/kernel/ipipe_tsc_asm.S 需要被修改。</p>
+<p>一旦类型为 <code>__ipipe_tscinfo</code> 的变量被定义，它可以通过
+<code>__ipipe_tsc_register()</code> 函数被注册到 I-pipe 内核。</p></li>
+</ul>
+<h3 id="例子-1">例子</h3>
+<p>作为一个例子，我们可以看到 arch/arm/mach-davinci/time.c 中：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_IPIPE</span><br><span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> __<span class="hljs-title">ipipe_tscinfo</span> <span class="hljs-title">tsc_info</span> =</span> &#123;<br>	.type = IPIPE_TSC_TYPE_FREERUNNING,<br>	.u = &#123;<br>			&#123;<br>				.mask = <span class="hljs-number">0xffffffff</span>,<br>			&#125;,<br>	&#125;,<br>&#125;;<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span> <span class="hljs-comment">/* CONFIG_IPIPE */</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">void</span> __init <span class="hljs-title">davinci_timer_init</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_IPIPE</span><br>	tsc_info.freq = davinci_clock_tick_rate;<br>	tsc_info.counter_vaddr = (<span class="hljs-keyword">void</span> *)(timers[TID_CLOCKSOURCE].base +<br>			timers[TID_CLOCKSOURCE].tim_off);<br>	tsc_info.u.counter_paddr = timers[TID_CLOCKSOURCE].pbase +<br>			timers[TID_CLOCKSOURCE].tim_off;<br>	__ipipe_tsc_register(&amp;tsc_info);<br>	<span class="hljs-comment">/* ... */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span> <span class="hljs-comment">/* CONFIG_IPIPE */</span></span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="中断控制器">中断控制器</h2>
+<h3 id="ic-handlers">IC handlers</h3>
+<h3 id="flow-handlers">flow handlers</h3>
+<h3 id="config_multi_irq_handler">CONFIG_MULTI_IRQ_HANDLER</h3>
+<h3 id="多处理器系统">多处理器系统</h3>
+<h3 id="gpio">GPIO</h3>
+<h3 id="实时驱动程序中的-gpio">实时驱动程序中的 GPIO</h3>
+<h3 id="gpio-作为中断源">GPIO 作为中断源</h3>
+<h2 id="i-pipe-自旋锁">I-pipe 自旋锁</h2>
+<div id="footnotes">
+<hr>
+<div id="footnotelist">
+<ol style="list-style:none; padding-left: 0;">
+<li id="fn:1">
+<span
+style="display: inline-block; vertical-align: top; padding-right: 10px;">1.</span><span
+style="display: inline-block; vertical-align: top;"><a target="_blank" rel="noopener" href="https://xenomai.org/2014/09/porting-xenomai-dual-kernel-to-a-new-arm-soc/">Porting
+Xenomai dual kernel to a new ARM
+SoC</a></span><a href="#fnref:1" rev="footnote"> ↩︎</a>
+</li>
+</ol>
+</div>
+</div>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Linux-%E5%86%85%E6%A0%B8/">Linux 内核</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/09/05/ubuntu-%E6%89%93%E5%BC%80%E7%83%AD%E7%82%B9%E5%85%B1%E4%BA%AB%E7%BD%91%E7%BB%9C/">
+                        <span class="hidden-mobile">ubuntu 打开热点共享网络</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments" lazyload>
+                
+                  
+                
+                
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"y7tlaLEOoW5C1xBYm8VBo64Q-gzGzoHsz","appKey":"F7gylUefEEtQk24FEbvgfnBi","path":"window.location.pathname","placeholder":"此处留言","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          Fluid.plugins.initFancyBox('#valine .vcontent img:not(.vemoji)');
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+              </article>
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> && <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- LeanCloud 统计PV -->
+        <span id="leancloud-site-pv-container" style="display: none">
+            总访问量 
+            <span id="leancloud-site-pv"></span>
+             次
+          </span>
+      
+      
+        <!-- LeanCloud 统计UV -->
+        <span id="leancloud-site-uv-container" style="display: none">
+            总访客数 
+            <span id="leancloud-site-uv"></span>
+             人
+          </span>
+      
+
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
