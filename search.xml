@@ -1496,6 +1496,9 @@ Compiler Assisted System Optimization</h1>
 <li><p>视频软件解码器提升很大（25%左右），因为属于 CPU 密集型</p></li>
 </ul>
 ]]></content>
+      <categories>
+        <category>note</category>
+      </categories>
       <tags>
         <tag>paper</tag>
       </tags>
