@@ -1357,6 +1357,9 @@ Measurements</h3>
 是一个高效的、可伸缩的、可移植的网络监控模型，已经可以运行在大部分的 BSD
 发行版上。</p>
 ]]></content>
+      <categories>
+        <category>note</category>
+      </categories>
       <tags>
         <tag>paper</tag>
       </tags>
