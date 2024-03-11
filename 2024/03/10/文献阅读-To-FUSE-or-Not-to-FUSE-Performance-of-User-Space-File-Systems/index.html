@@ -16,19 +16,36 @@
   <meta name="author" content="MiaoHao-oops">
   <meta name="keywords" content="">
   
-    <meta property="og:type" content="website">
-<meta property="og:title" content="分类">
-<meta property="og:url" content="http://miaohao-oops.github.io/categories/index.html">
+    <meta property="og:type" content="article">
+<meta property="og:title" content="文献阅读: To FUSE or Not to FUSE: Performance of User-Space File Systems">
+<meta property="og:url" content="http://miaohao-oops.github.io/2024/03/10/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB-To-FUSE-or-Not-to-FUSE-Performance-of-User-Space-File-Systems/index.html">
 <meta property="og:site_name" content="Miao&#39;s Blog">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-03-10T08:12:44.000Z">
+<meta property="article:modified_time" content="2024-03-10T08:12:44.024Z">
 <meta property="article:author" content="MiaoHao-oops">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>分类 - Miao&#39;s Blog</title>
+  <title>文献阅读: To FUSE or Not to FUSE: Performance of User-Space File Systems - Miao&#39;s Blog</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
@@ -56,7 +73,7 @@
 
 
 <body>
-  <header style="height: 60vh;">
+  <header style="height: 70vh;">
     <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
@@ -157,9 +174,51 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="分类">
+            <span class="h2" id="subtitle" title="文献阅读: To FUSE or Not to FUSE: Performance of User-Space File Systems">
               
             </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2024-03-10 16:12" pubdate>
+        2024年3月10日 下午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      0 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      1 分钟
+    </span>
+  
+
+  
+  
+    
+      <!-- LeanCloud 统计文章PV -->
+      <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+        <i class="iconfont icon-eye" aria-hidden="true"></i>
+        <span id="leancloud-page-views"></span> 次
+      </span>
+    
+  
+</div>
 
             
           </div>
@@ -172,227 +231,110 @@
 
   <main>
     
-      <div class="container nopadding-x-md">
-        <div class="py-5" id="board"
-          >
-          
-          <div class="container">
-            <div class="row">
-              <div class="col-12 col-md-10 m-auto">
-                
+      
 
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">文献阅读: To FUSE or Not to FUSE: Performance of User-Space File Systems</h1>
+            
+            <div class="markdown-body">
+              
 
-
-
-
-<div class="category-list">
-  
-  
-  
-    
-    
-    <div class="category row">
-      <a
-        class="category-item collapsed list-group-item category-item-action col-10 col-md-11"
-        id="heading-aad653ca3ee669635f2938b73098b6d7" role="tab" data-toggle="collapse" href="#collapse-aad653ca3ee669635f2938b73098b6d7"
-        aria-expanded="false"
-      >
-        note
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      <a href="/categories/note/" class="category-count col-2 col-md-1">
-        <i class="iconfont icon-articles"></i>
-        <span>8</span>
-      </a>
-      <div class="category-collapse collapse" id="collapse-aad653ca3ee669635f2938b73098b6d7" role="tabpanel" aria-labelledby="heading-aad653ca3ee669635f2938b73098b6d7">
-        
-        
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/2024/03/11/Academic-English-Unit-1-Psychology/" class="list-group-item list-group-item-action">
-          <span class="category-post">Academic English: Unit 1 Psychology</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2024/03/06/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB-bpftime-userspace-eBPF-Runtime-for-Uprobe-Syscall-and-Kernel-User-Interactions/" class="list-group-item list-group-item-action">
-          <span class="category-post">文献阅读: bpftime: userspace eBPF Runtime for Uprobe, Syscall and Kernel-User Interactions</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2024/03/05/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB-The-BSD-Packet-Filter-A-New-Architecture-for-User-level-Packet-Capture/" class="list-group-item list-group-item-action">
-          <span class="category-post">文献阅读: The BSD Packet Filter: A New Architecture for User-level Packet Capture</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2023/11/05/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB%E4%B8%93%E9%A2%98-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E5%8A%A0%E9%80%9F/" class="list-group-item list-group-item-action">
-          <span class="category-post">文献阅读专题:系统调用加速</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2022/09/05/ubuntu-%E6%89%93%E5%BC%80%E7%83%AD%E7%82%B9%E5%85%B1%E4%BA%AB%E7%BD%91%E7%BB%9C/" class="list-group-item list-group-item-action">
-          <span class="category-post">ubuntu 打开热点共享网络</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2022/06/02/chisel%E4%BD%BF%E7%94%A8%E6%B5%85%E6%B5%8B/" class="list-group-item list-group-item-action">
-          <span class="category-post">chisel 使用浅测</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2022/05/02/%E4%BD%BF%E7%94%A8nginx%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86Tomcat/" class="list-group-item list-group-item-action">
-          <span class="category-post">使用 nginx 在服务器上反向代理 Tomcat</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2022/03/29/LR-0-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95/" class="list-group-item list-group-item-action">
-          <span class="category-post">LR(0)分析方法</span>
-        </a>
-      
-    
-  </div>
-
-          
-        
-      </div>
-    </div>
-  
-    
-    
-    <div class="category row">
-      <a
-        class="category-item collapsed list-group-item category-item-action col-10 col-md-11"
-        id="heading-1910f2289e05bb774a226ad2397ffb7e" role="tab" data-toggle="collapse" href="#collapse-1910f2289e05bb774a226ad2397ffb7e"
-        aria-expanded="false"
-      >
-        NEMU
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      <a href="/categories/NEMU/" class="category-count col-2 col-md-1">
-        <i class="iconfont icon-articles"></i>
-        <span>4</span>
-      </a>
-      <div class="category-collapse collapse" id="collapse-1910f2289e05bb774a226ad2397ffb7e" role="tabpanel" aria-labelledby="heading-1910f2289e05bb774a226ad2397ffb7e">
-        
-        
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/2022/02/07/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B04-%E6%8C%87%E4%BB%A4%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/" class="list-group-item list-group-item-action">
-          <span class="category-post">nju-pa摸鱼记4-指令的生命周期</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2022/02/05/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B03-nemu%E4%B8%AD%E5%AE%8F%E7%9A%84%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" class="list-group-item list-group-item-action">
-          <span class="category-post">nju-pa摸鱼记3-NEMU中宏的源码阅读</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2022/02/01/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B02-%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%8E%CE%BB%E6%BC%94%E7%AE%97/" class="list-group-item list-group-item-action">
-          <span class="category-post">nju-pa摸鱼记2-计算机与λ演算</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2022/01/31/nju-pa%E6%91%B8%E9%B1%BC%E8%AE%B01-%E5%AE%8F%E7%9A%84%E5%A6%99%E7%94%A8/" class="list-group-item list-group-item-action">
-          <span class="category-post">nju-pa摸鱼记1-宏的妙用</span>
-        </a>
-      
-    
-  </div>
-
-          
-        
-      </div>
-    </div>
-  
-    
-    
-    <div class="category row">
-      <a
-        class="category-item collapsed list-group-item category-item-action col-10 col-md-11"
-        id="heading-126ac9f6149081eb0e97c2e939eaad52" role="tab" data-toggle="collapse" href="#collapse-126ac9f6149081eb0e97c2e939eaad52"
-        aria-expanded="false"
-      >
-        blog
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      <a href="/categories/blog/" class="category-count col-2 col-md-1">
-        <i class="iconfont icon-articles"></i>
-        <span>4</span>
-      </a>
-      <div class="category-collapse collapse" id="collapse-126ac9f6149081eb0e97c2e939eaad52" role="tabpanel" aria-labelledby="heading-126ac9f6149081eb0e97c2e939eaad52">
-        
-        
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/2022/08/23/%E7%AC%AC%E5%85%AD%E5%B1%8A%E2%80%9C%E9%BE%99%E8%8A%AF%E6%9D%AF%E2%80%9D%E5%A4%A7%E8%B5%9B%E5%8F%82%E8%B5%9B%E6%80%BB%E7%BB%93/" class="list-group-item list-group-item-action">
-          <span class="category-post">第六届“龙芯杯”大赛参赛总结</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2022/07/21/%E8%AE%B0%E8%AE%A1%E7%AE%97%E6%89%80%E5%A4%8F%E4%BB%A4%E8%90%A5%E7%BB%8F%E5%8E%86/" class="list-group-item list-group-item-action">
-          <span class="category-post">记计算所夏令营经历</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2022/04/01/%E4%B8%89%E6%9C%88%E4%B8%89%E5%8D%81%E4%B8%80%E6%97%A5%E4%BA%8E%E8%A5%BF%E5%8C%97%E9%A3%9F%E5%A0%82%E7%94%A8%E5%8D%88%E9%A4%90%E4%BD%9C%E8%AF%97%E4%B8%80%E9%A6%96/" class="list-group-item list-group-item-action">
-          <span class="category-post">三月三十一日于西北食堂用午餐作诗一首</span>
-        </a>
-      
-    
-      
-      
-        <a href="/2022/02/01/try-latex/" class="list-group-item list-group-item-action">
-          <span class="category-post">try latex</span>
-        </a>
-      
-    
-  </div>
-
-          
-        
-      </div>
-    </div>
-  
-  
-</div>
-
-              </div>
             </div>
-          </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/03/11/Academic-English-Unit-1-Psychology/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Academic English: Unit 1 Psychology</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/03/06/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB-bpftime-userspace-eBPF-Runtime-for-Uprobe-Syscall-and-Kernel-User-Interactions/">
+                        <span class="hidden-mobile">文献阅读: bpftime: userspace eBPF Runtime for Uprobe, Syscall and Kernel-User Interactions</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments" lazyload>
+                
+                  
+                
+                
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"y7tlaLEOoW5C1xBYm8VBo64Q-gzGzoHsz","appKey":"F7gylUefEEtQk24FEbvgfnBi","path":"window.location.pathname","placeholder":"此处留言","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          Fluid.plugins.initFancyBox('#valine .vcontent img:not(.vemoji)');
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+              </article>
+            
+          </article>
         </div>
       </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
     
 
     
@@ -500,6 +442,19 @@
   
 
 
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
 
