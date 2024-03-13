@@ -2318,7 +2318,13 @@ flexibility vs. development ease</p>
 <em>path-to-inode</em> map 的细节，从而高层 API
 中都是<strong>直接操作文件路径</strong>的方法。</p>
 <h4 id="queues">Queues</h4>
+<p>FUSE 的队列存在于内核态，由 request 构成。FUSE driver 通过管理
+request 队列进行 request 调度。FUSE 中包含 5
+个不同的队列，分别用于管理不同种类的 request，同时，不同队列中的 request
+具有不同的优先级，当 FUSE driver 决定发送哪个 request 给 FUSE deamon
+时，优先级就会起到作用。</p>
 <p><img src="/img/FUSE-queues.png" /></p>
+<p>FUSE 中的 5 个队列名称及其对应功能：</p>
 <table>
 <thead>
 <tr class="header">
@@ -2349,6 +2355,24 @@ flexibility vs. development ease</p>
 </tr>
 </tbody>
 </table>
+<h2 id="fuse-workflow">FUSE Workflow</h2>
+<p>Linux FUSE 文档中给出了一个 FUSE 的工作流程：</p>
+<figure class="highlight gherkin"><table><tr><td class="code"><pre><code class="hljs gherkin">|<span class="hljs-string">  &quot;rm /mnt/fuse/file&quot;               </span>|<span class="hljs-string">  FUSE filesystem daemon</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<br>|<span class="hljs-string">                                    </span>|<span class="hljs-string">  &gt;sys_read()</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">    &gt;fuse_dev_read()</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">      &gt;request_wait()</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">        [sleep on fc-&gt;waitq]</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<br>|<span class="hljs-string">  &gt;sys_unlink()                     </span>|<br>|<span class="hljs-string">    &gt;fuse_unlink()                  </span>|<br>|<span class="hljs-string">      [get request from             </span>|<br>|<span class="hljs-string">       fc-&gt;unused_list]             </span>|<br>|<span class="hljs-string">      &gt;request_send()               </span>|<br>|<span class="hljs-string">        [queue req on fc-&gt;pending]  </span>|<br>|<span class="hljs-string">        [wake up fc-&gt;waitq]         </span>|<span class="hljs-string">        [woken up]</span><br><span class="hljs-string"></span>|<span class="hljs-string">        &gt;request_wait_answer()      </span>|<br>|<span class="hljs-string">          [sleep on req-&gt;waitq]     </span>|<br>|<span class="hljs-string">                                    </span>|<span class="hljs-string">      &lt;request_wait()</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">      [remove req from fc-&gt;pending]</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">      [copy req to read buffer]</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">      [add req to fc-&gt;processing]</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">    &lt;fuse_dev_read()</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">  &lt;sys_read()</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<br>|<span class="hljs-string">                                    </span>|<span class="hljs-string">  [perform unlink]</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<br>|<span class="hljs-string">                                    </span>|<span class="hljs-string">  &gt;sys_write()</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">    &gt;fuse_dev_write()</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">      [look up req in fc-&gt;processing]</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">      [remove from fc-&gt;processing]</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">      [copy write buffer to req]</span><br><span class="hljs-string"></span>|<span class="hljs-string">          [woken up]                </span>|<span class="hljs-string">      [wake up req-&gt;waitq]</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">    &lt;fuse_dev_write()</span><br><span class="hljs-string"></span>|<span class="hljs-string">                                    </span>|<span class="hljs-string">  &lt;sys_write()</span><br><span class="hljs-string"></span>|<span class="hljs-string">        &lt;request_wait_answer()      </span>|<br>|<span class="hljs-string">      &lt;request_send()               </span>|<br>|<span class="hljs-string">      [add request to               </span>|<br>|<span class="hljs-string">       fc-&gt;unused_list]             </span>|<br>|<span class="hljs-string">    &lt;fuse_unlink()                  </span>|<br>|<span class="hljs-string">  &lt;sys_unlink()                     </span>|<br></code></pre></td></tr></table></figure>
+<ol type="1">
+<li>用户程序发起文件系统操作 <code>rm /mnt/fuse/file</code></li>
+<li>FUSE deamon 读 <code>/dev/fuse</code>，但此时 request
+队列为空，因此触发 <code>request_wait()</code>，进入睡眠</li>
+<li>用户程序触发系统调用 <code>sys_unlink()</code>，内核路由到 FUSE
+操作函数，由将操作对应 request 加入 pending 队列，并唤醒 FUSE
+deamon</li>
+<li>FUSE deamon 被唤醒后，将 requset 从 pending 队列移除，并将其加入
+processing 队列</li>
+<li>FUSE deamon 返回用户空间后，根据读到的 request
+进行相应自定义操作</li>
+<li>FUSE deamon 执行完操作后，向 <code>/dev/fuse</code> 写 reply，将对应
+request 从 processing 队列移除，并唤醒等待的用户程序</li>
+<li>用户程序从内核系统调用返回，完成操作</li>
+</ol>
 ]]></content>
       <categories>
         <category>note</category>
