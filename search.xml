@@ -2132,6 +2132,75 @@ words on something, especially on the surface of a stone or coin
 （尤指在石头或硬币表面）雕刻，印刷，题写</p>
 </blockquote>
 <hr />
+<p>Social psychology <em>purports</em> to examine the relationship
+between cognition and society.</p>
+<p>社会心理学<em>声称</em>要检验认知与社会之间的关系。</p>
+<blockquote>
+<p>purport /pəˈpɔːt/ <em>vt.</em> to claim to be or do somethine, even
+if this is not true 声称</p>
+</blockquote>
+<hr />
+<p>But even then, this investigation often <em>presumes</em> that a
+collective of <em>Cartesian</em> subjects are the real focus of the
+<em>enquiry</em>, not selves that co-evolve with others over time.</p>
+<p>但即便如此，这种调查通常<em>假设</em>一群<em>信奉笛卡尔哲学的</em>主体是<em>调查</em>的焦点，而不是随时间推移与他人共同进化的自我。</p>
+<blockquote>
+<p>presume /prɪˈzjuːm/ <em>vt.</em> take to be the case or to be true;
+accept without verificatin or proof 假设，设想</p>
+<p>Cartesian /kɑːˈtiːziən; kɑːˈtiːʒən/ <em>adj.</em> of or relating to
+Rene Descartes or his works 笛卡尔哲学的</p>
+<p>enquiry /ɪnˈkwaɪəri/ <em>n.</em> an instance of questioning
+询问，查问</p>
+</blockquote>
+<hr />
+<p>They were the first to identify the so-called "<em>bystander</em>
+effect", in which people seem to respond slowly to someone in
+<em>distress</em> if others are around.</p>
+<p>他们第一个发现了所谓的“<em>旁观者</em>效应”，即当有旁人在周围时，人们似乎对他人的<em>险情</em>反应更加迟钝。</p>
+<blockquote>
+<p>bystander /ˈbaɪstændə(r)/ <em>n.</em> someone who watched what is
+happening with out taking part 旁观者，局外人，看热闹的人</p>
+<p>distress /dɪˈstres/ <em>n.</em> a state of adversity(danger or
+affliction or need) 危难，险情</p>
+</blockquote>
+<hr />
+<p>Darley and Latane suggested that this might come from a
+"<em>diffusion</em> of responsibility", in which the <em>obligation</em>
+to react is <em>diluted</em> across a bigger group of people.</p>
+<p>Darley 和 Latane
+认为这可能源自于“责任的<em>扩散</em>”，也就是说做出反应的<em>义务</em>在更大的群体中被<em>削弱</em>了。</p>
+<blockquote>
+<p>diffusion /dɪˈfjuːʒn/ <em>n.</em> the act of dispersing or diffusion
+something 扩散，传播</p>
+<p>obligation /ˌɒblɪˈɡeɪʃ(ə)n/ <em>n.</em> the social force that binds
+you to the courses of action demanded by that force 义务，责任</p>
+<p>dilute /daɪˈluːt/ <em>vt.</em> to make a quality, belief etc. weaker
+or less effective 降低（质量）；削弱（信念）</p>
+</blockquote>
+<hr />
+<p>This numerical approach <em>wipes away</em> vital <em>contextual</em>
+information that might help to understand people's real motives.</p>
+<p>这种数字化的方法<em>抹去</em>了有助于理解人们真实动机的重要<em>上下文</em>信息。</p>
+<blockquote>
+<p>contextual /kənˈtekstʃuəl/ <em>adj.</em> relating to or determined by
+or in context 上下文的，语境相关的</p>
+</blockquote>
+<hr />
+<p>Genovese's murder had to be seen against a backdrop in which violence
+against women was not taken seriously, Cherry said, and in which people
+were <em>reluctant</em> to step into what might have been a
+<em>domestic</em> <em>dispute</em>.</p>
+<p>Genovese 的谋杀案的背景是针对女性的暴力并不被重视，Cherry
+说，并且人们<em>不愿</em>介入可能是一场<em>家庭纠纷</em>的事件。</p>
+<blockquote>
+<p>reluctant /rɪˈlʌktənt/ <em>adj.</em> unwillingness to do something
+contrary to your custom 勉强的，不情愿的</p>
+<p>domestic /dəˈmestɪk/ <em>adj.</em> of or relating to the home
+家庭的</p>
+<p>dispute /dɪˈspjuːt/ <em>n.</em> coming into conflict wich
+争论，纠纷</p>
+</blockquote>
+<hr />
 ]]></content>
       <categories>
         <category>note</category>
@@ -2153,14 +2222,14 @@ Tarasov, IBM Research-Almaden; Erez Zadok, Stony Brook University</p>
 and Storage Technologies</p>
 <p>发表时间：February 2017</p>
 </blockquote>
-<h2 id="what">What</h2>
 <p>FUSE，即 Filesystem in
 USErspace，用户空间的文件系统。对于传统的宏内核而言，文件系统都实现在内核态，而
 FUSE
 这项技术使得可以在用户空间实现文件系统。用户空间文件系统通常用于进行原型验证，这是因为它具有开发便捷的特点。然而，在用户空间实现文件系统却带来了巨大的性能开销，因此
 FUSE 颇具争议：FUSE 能否用于开发生产环境下的文件系统。本文对 FUSE
 进行了性能追踪和统计，并在真实负载下分析了 FUSE 的性能瓶颈。</p>
-<h3 id="fuse-design">FUSE design</h3>
+<h2 id="fuse-design">FUSE design</h2>
+<h3 id="high-level-architecture">High-Level Architecture</h3>
 <p>从高层视角来看 FUSE，一个 FUSE 文件系统包含两个部分：</p>
 <ul>
 <li>内核态 FUSE driver，它对用户态暴露
@@ -2178,10 +2247,108 @@ FUSE 颇具争议：FUSE 能否用于开发生产环境下的文件系统。本�
 <li>根据请求类型，创建 FUSE request，并挂载到队列中</li>
 <li><code>/dev/fuse</code> 分发 request 给用户态的 FUSE deamon</li>
 <li>FUSE deamon 根据收到的 request 执行对应的处理</li>
-<li>处理结束后，FUSE deamon 通过 <code>/dev/fuse</code> 告知内核</li>
+<li>处理结束后，FUSE deamon 通过 <code>/dev/fuse</code> 发送 reply
+告知内核</li>
 <li>FUSE driver 将请求项从队列删除，将操作结果返回给用户程序</li>
-<li></li>
 </ol>
+<h3 id="implementation-details">Implementation Details</h3>
+<h4 id="user-kernel-protocol">User-Kernel Protocol</h4>
+<p><img src="/img/FUSE-request-types.png" /></p>
+<p>上表总结了 FUSE 的 43 种 request，其中加黑的与 VFS
+操作语意有些出入。</p>
+<ul>
+<li><strong>INIT</strong>：当文件系统被挂载时由内核产生。用户和内核确认
+<ol type="1">
+<li>协议版本</li>
+<li>相互支持的能力集合（如 READDIRPLUS 的支持）</li>
+<li>各种参数的设置（如 FUSE 预读大小、时间粒度）</li>
+</ol></li>
+<li><strong>DESTROY</strong>：当文件系统被卸载时由内核产生。FUSE deamon
+执行清理工作，任何与该文件系统 request
+都无法被送往用户空间处理，而后，FUSE deamon 将退出</li>
+<li><strong>INTERRUPT</strong>：由内核发出，用于停止某个
+request（如一个等待 READ 的进程终止了）。</li>
+</ul>
+<blockquote>
+<p><em>sequence#</em>：每一个 request 都有一个唯一的 <em>sequence#</em>
+用于识别，该序列号由内核分配</p>
+<p><em>node ID</em>：一个 64 位的无符号整数，用于在内核和用户空间识别
+inode</p>
+</blockquote>
+<ul>
+<li><strong>LOOKUP</strong>：进行 path-to-inode 转换，每次 lookup 一个
+inode 时，内核就将其放入 inode 缓存</li>
+<li><strong>FORGET</strong> &amp; <strong>BATCH_FORGET</strong>：将
+inode 从缓存中删除，并通知 FUSE deamon 释放相关数据结构</li>
+<li><strong>OPEN</strong>：打开文件，FUSE deamon 可以选择性地返回一个 64
+位的文件句柄，而后每一个与该文件有关的 request 都将带有这个句柄</li>
+</ul>
+<blockquote>
+<p><em>file handle</em>：FUSE deamon
+可以利用该句柄存储打开文件的信息，例如在栈文件系统中，FUSE
+文件系统可以将底层文件系统的描述符存储为 FUSE 文件句柄的一部分</p>
+</blockquote>
+<ul>
+<li><strong>FLUSH</strong>：关闭文件</li>
+<li><strong>RELEASE</strong>：之前打开的文件没有任何引用时发出</li>
+<li><strong>OPENDIR</strong> &amp; <strong>RELEASEDIR</strong>：与
+<strong>OPEN</strong> 和 <strong>RELEASE</strong>
+语义相同，但操作对象是目录文件</li>
+<li><strong>READDIR</strong> &amp;
+<strong>READDIRPLUS</strong>：返回目录项，<strong>READDIRPLUS</strong>
+还会返回每个项的元数据信息</li>
+<li><strong>ACCESS</strong>：内核用于确认用户进程对于某个文件是否具有访问权限</li>
+</ul>
+<h4 id="library-and-api-levels">Library and API Levels</h4>
+<p>在用户空间 FUSE 的 API 严格来说有两层，底层 API 负责实现与内核 FUSE
+driver 的基本通信，基于底层 API 所构建的高层 API
+用于方便用户态文件系统的编写。</p>
+<blockquote>
+<p>底层 API vs. 高层 API <span class="math inline">\(\approx\)</span>
+flexibility vs. development ease</p>
+</blockquote>
+<p><strong>底层 API</strong>：</p>
+<ol type="1">
+<li>接收并翻译来自内核的 request</li>
+<li>发送格式化的 reply</li>
+<li>为文件系统的配置和挂载提供便利</li>
+<li>为内核和用户空间隐藏可能的版本差异</li>
+</ol>
+<p><strong>高层 API</strong> 包含更多语义，尤其是隐藏了
+<em>path-to-inode</em> map 的细节，从而高层 API
+中都是<strong>直接操作文件路径</strong>的方法。</p>
+<h4 id="queues">Queues</h4>
+<p><img src="/img/FUSE-queues.png" /></p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">名称</th>
+<th style="text-align: center;">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><em>interrupts</em></td>
+<td style="text-align: center;">INTERRUPT request</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><em>forgets</em></td>
+<td style="text-align: center;">FORGET request</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><em>pending</em></td>
+<td style="text-align: center;">同步 request</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><em>processing</em></td>
+<td style="text-align: center;">正在处理的 request</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><em>background</em></td>
+<td style="text-align: center;">异步 request</td>
+</tr>
+</tbody>
+</table>
 ]]></content>
       <categories>
         <category>note</category>
